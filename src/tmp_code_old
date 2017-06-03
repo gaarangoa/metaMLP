@@ -1,0 +1,86 @@
+
+// !TODO: this is an alternative, a little bit slower
+
+// This function takes a string and traverses the sequence looking for the signatures.
+std::string Signatures::MapSignatures(std::string header, std::string read){
+    
+    int i = 0;
+    int flag = 1;
+    while(i<=read.length()-kmer_size){
+        std::string kmer = read.substr(i, kmer_size);
+        try{
+            if(signature_hash[kmer]==true){
+                if (flag == 1){
+                    std::cout << header << "\t" << i << "\t" << i+kmer_size << "\t" << read.length() << "\t" << kmer << "\n";
+                    i=i+kmer_size+1;
+
+                    flag = 0;
+
+                }else{
+                    i=i+5;
+                }
+            }
+            else{
+                flag=1;
+                i++;
+            }
+        }
+        catch(const std::exception){
+            // std::cout << "NOT-IN: " << kmer << "\n";
+        }
+    }
+    return read;
+}
+
+
+// traverse the sequences and get the signatures in order
+void Signatures::ParseSignaturesToSequencesByLine(std::string fsequence){
+    std::cout << "Traversing Input File ..." << "\n";
+
+    // std::cout << kmer_size << "\n";
+
+    // Load Fasta File
+    std::ifstream input(fsequence);
+    if(!input.good()){
+        std::cerr << "Error opening '"<<fsequence<<"' - Not a FASTA file." << std::endl;
+    }
+
+    // Here traverse the FASTA file (At this stage I'm assuming the input is a fasta file)
+    // TODO: what if the input is a fastq file 
+    std::string line, name, content;
+    int num_reads=0, proc_reads=0;
+
+    while( std::getline( input, line ) ){
+        
+        if( line.empty() || line[0] == '>' ){ // Identifier marker
+            if( !name.empty() ){ // Print out what we read from the last entry
+
+                content = Signatures::MapSignatures(name, content);
+                // std::cout << name << " : " << std::endl;
+
+                name.clear();
+                proc_reads++;
+            }
+            if( !line.empty() ){
+                name = line.substr(1);
+            }
+            content.clear();
+        } else if( !name.empty() ){
+            if( line.find(' ') != std::string::npos ){ // Invalid sequence--no spaces allowed
+                name.clear();
+                content.clear();
+            } else {
+                content += line;
+            }
+        }
+    }
+    if( !name.empty() ){ // Print out what we read from the last entry
+        content = Signatures::MapSignatures(name, content);
+        // std::cout << name << " : " << std::endl;
+        proc_reads++;
+    }
+
+    // std::cout << "Input Sequences: " << num_reads << "\n";
+    std::cout << "Processed Sequences: " << proc_reads << "\n";
+
+}
