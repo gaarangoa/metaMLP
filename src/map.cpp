@@ -263,7 +263,7 @@ void index(int argc, char **argv){
     fastText.train(a);
 
     std::cout << "Cleaning temporal files ..." <<std::endl;
-    remove(a->input.c_str());
+    // remove(a->input.c_str());
     
     // // skipgram model
     // std::cout << "indexing skipgram model ..." << std::endl;

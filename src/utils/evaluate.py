@@ -9,7 +9,7 @@ predicted = [];
 for i in open(sys.argv[1]):
     i=i.split();
     try:
-        if float(i[2]) < minp: continue
+        if float(i[3]) < minp: continue
         predicted.append([i[0].split("|")[idx], i[1].replace('__label__',"").replace('__',"")])
     except:
         print i

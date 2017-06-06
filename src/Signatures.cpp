@@ -82,6 +82,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     // fasttext::Matrix wordVectors(skipgram.dict_->nwords(), skipgram.args_->dim);
     // skipgram.precomputeWordVectors(wordVectors);
 
+    std::vector<std::string> readSeqs;
+    std::vector<std::string> protSeqs;
 
     tsl::hopscotch_map< std::string, bool > signature_hash = master_signature_hash;
     tsl::hopscotch_map< std::string, std::string > signature_hash_full = master_signature_hash_full;
@@ -124,6 +126,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
     std::size_t stop_c;
 
+    std::string pkmer; 
+
     int l=0;
     int ishash;
     // mtx.lock();
@@ -151,42 +155,54 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         l = toCSkmer.length();
 
         // Get kmer from a random position
-        KMER = toCSkmer.substr(rx, seed_size);
+        // KMER = toCSkmer.substr(rx, kmer_size);
 
-        ishash = signature_hash.count(KMER.substr(0,seed_size));
+        // ishash = signature_hash_full.count(KMER.substr(0,kmer_size));
         
         // make n tries to get the right kmer from the read
         int tries=0;
-        if(ishash>0){
+        // if(ishash>0){
             // ishash = 0;
             while(1){
                 rx = uni(rng);
                 KMER = toCSkmer.substr(rx, kmer_size);
-                ishash = signature_hash_full.count(KMER.substr(0,kmer_size));
+                ishash = signature_hash_full.count(KMER);
                 if(ishash>0) break;
                 if(tries == 20) break;
                 tries++;
             }
-        }
+        // }
 
         // std::cout << ishash << "\t" << KMER << std::endl;
 
         // Got a kmer at all?, great, make a sentence and predict!! :)
         if(ishash>0){
             pre_buffer = KMER;
-            
-            for(int ki=0; ki<20; ki++){
+            int manykmers = 0;
+            for(int ki=0; ki<30; ki++){
                 rx = uni(rng);
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
-                pre_buffer+=' '+toCSkmer.substr(rx, kmer_size);
+                pkmer = toCSkmer.substr(rx, kmer_size);
+                // if(signature_hash_full.count(pkmer)>0){
+                    pre_buffer+=' '+pkmer;
+                    manykmers++;
+                // }
+                pkmer.clear();
             }
 
-            buffer+=signature_hash_full[KMER.substr(0,kmer_size)]+' '+pre_buffer+'\n';
-            // buffer+=pre_buffer+'\n';
-            pre_buffer.clear();
-            
-            readLabels.push_back(seqan::toCString(ids[total_reads]));
-            num_reads++;
+            if(manykmers>5){
+                
+                // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
+                buffer+=pre_buffer+'\n';
+                pre_buffer.clear();
+                
+                readLabels.push_back(seqan::toCString(ids[total_reads]));
+                std::stringstream iseq;
+                iseq << seqs[total_reads];
+                readSeqs.push_back(iseq.str());
+                protSeqs.push_back(toCSkmer);
+                num_reads++;
+            }
 
         }
 
@@ -195,7 +211,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     //  mtx.unlock();
     // std::unordered_map < std::string, std::tuple < std::string, float > > FuncPredLocal;
     std::stringstream trex(buffer);
-    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred);
+    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs);
     
     // mtx.lock();
         // FuncPred = FuncPredLocal;

@@ -135,7 +135,10 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
         // for computing the skipgram I follow a different approach, first  I don't need to split the sequence into reads, and just take the kmers and store them into a file that will be used for the training of the skipgram. 
         
-        fo << label << "\t" << prelabel+' ';
+        // TODO replace this if you want to put in index the label information
+        // fo << label << "\t" << prelabel+' ';
+
+        fo << label << '\t';
 
         for (int i=0; i<Sl-k; i++){
             ks = rProt.substr(i, k);
@@ -143,7 +146,10 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
             // fos << ks+' ';
             if(i % 10 == 0 && i>0){
                 fo << ks+' ' << std::endl;
-                fo << label << "\t" << prelabel+' ';
+                
+                fo << label << '\t';
+                // TODO: here add it if you want to put the labels information
+                // fo << label << "\t" << prelabel+' ';
             }else{
                 fo << ks+' ';
             }
