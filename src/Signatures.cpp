@@ -165,8 +165,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             // ishash = 0;
             while(1){
                 rx = uni(rng);
-                KMER = toCSkmer.substr(rx, kmer_size);
-                ishash = signature_hash_full.count(KMER);
+                KMER = toCSkmer.substr(rx, seed_size);
+                ishash = signature_hash.count(KMER);
                 if(ishash>0) break;
                 if(tries == 20) break;
                 tries++;
@@ -191,7 +191,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             }
 
             if(manykmers>5){
-                
+
                 // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
                 buffer+=pre_buffer+'\n';
                 pre_buffer.clear();
@@ -213,6 +213,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     std::stringstream trex(buffer);
     fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs);
     
+    // std::cout << seqan::length(readLabels) << "\t" << seqan::length(readSeqs) << std::endl;
     // mtx.lock();
         // FuncPred = FuncPredLocal;
     // mtx.unlock();

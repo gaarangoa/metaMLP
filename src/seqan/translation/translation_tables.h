@@ -251,6 +251,30 @@ char const TranslateTableDnaToAminoAcid_<
     GeneticCode<
         MURPHY10>, TVoidSpec>::VALUE [4][4][4] =
 {
+    // DIAMOND
+    // { // a??
+    //     { 'K', 'K', 'K', 'K' }, // aa?
+    //     { 'A', 'A', 'A', 'A' }, // ac?
+    //     { 'K', 'A', 'K', 'A' }, // ag?
+    //     { 'I', 'I', 'M', 'L' }  // au?
+    // }, { // c??
+    //     { 'K', 'H', 'K', 'H' }, // ca?
+    //     { 'P', 'P', 'P', 'P' }, // cc?
+    //     { 'K', 'K', 'K', 'K' }, // cg?
+    //     { 'I', 'I', 'I', 'I' }  // cu?
+    // }, { // g??
+    //     { 'E', 'K', 'K', 'K' }, // ga?
+    //     { 'A', 'A', 'A', 'A' }, // gc?
+    //     { 'G', 'G', 'G', 'G' }, // gg?
+    //     { 'I', 'I', 'I', 'I' }  // gu?
+    // }, { // u??
+    //     { '*', 'Y', '*', 'Y' }, // ua?
+    //     { 'A', 'A', 'A', 'A' }, // uc?
+    //     { '*', 'C', 'W', 'C' }, // ug?
+    //     { 'I', 'F', 'I', 'F' }  // uu?
+    // }
+
+    // RAPSearch
     { // a??
         { 'K', 'E', 'K', 'E' }, // aa?
         { 'S', 'S', 'S', 'S' }, // ac?

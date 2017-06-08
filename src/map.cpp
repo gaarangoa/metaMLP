@@ -25,7 +25,7 @@ void printPredictUsage() {
     << "  -output       output file to write the processed reads\n"
     << "  -proc         Number of threads to use [default 8]\n "
     << "  -kmer         k-mer size [default 11 - same kmer used in predX index]\n"
-    << "  -seed         seed size [default 5 - amino acids]\n"
+    << "  -seed         seed size [default 9 - amino acids]\n"
     << std::endl;
 }
 
@@ -260,6 +260,8 @@ void index(int argc, char **argv){
     a->minCount = 0;
     a->dim = 10;
     a->wordNgrams = 1;
+    // a->minn = 3;
+    // a->maxn = 6;
     fastText.train(a);
 
     std::cout << "Cleaning temporal files ..." <<std::endl;

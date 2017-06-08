@@ -1,5 +1,5 @@
 #include "Index.h"
-
+// RAPsearch index
 std::unordered_map<char, char> reducedIndexTable = {
                                                         {'A','A'},
                                                         {'C','C'},
@@ -24,6 +24,32 @@ std::unordered_map<char, char> reducedIndexTable = {
                                                         {'Y','F'},
                                                         {'Z','X'}
                                                     };
+
+// DIAMOND index
+// std::unordered_map<char, char> reducedIndexTable = {
+//                                                         {'A','A'},
+//                                                         {'C','C'},
+//                                                         {'D','K'},
+//                                                         {'E','K'},
+//                                                         {'F','F'},
+//                                                         {'G','G'},
+//                                                         {'H','H'},
+//                                                         {'I','I'},
+//                                                         {'K','K'},
+//                                                         {'L','I'},
+//                                                         {'M','M'},
+//                                                         {'N','K'},
+//                                                         {'P','P'},
+//                                                         {'Q','K'},
+//                                                         {'R','K'},
+//                                                         {'S','A'},
+//                                                         {'T','A'},
+//                                                         {'V','I'},
+//                                                         {'W','W'},
+//                                                         {'X','X'},
+//                                                         {'Y','Y'},
+//                                                         {'Z','X'}
+//                                                     };
 
 
 Index::Index(){
