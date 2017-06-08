@@ -40,7 +40,7 @@ Args::Args() {
   kmer = "11";
   proc = "8";
   labp = "4";
-  seed = "3";
+  seed = "11";
   db = "";
 
   qout = false;
