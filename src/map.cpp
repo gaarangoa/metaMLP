@@ -265,22 +265,7 @@ void index(int argc, char **argv){
     fastText.train(a);
 
     std::cout << "Cleaning temporal files ..." <<std::endl;
-    // remove(a->input.c_str());
-    
-    // // skipgram model
-    // std::cout << "indexing skipgram model ..." << std::endl;
-    // a->minn = 3;
-    // a->maxn = 6;
-    // a->dim = 100;
-    // a->lr = 0.2;
-    // a->loss = fasttext::loss_name::ns;
-    // a->model = fasttext::model_name::sg;
-    // a->input = a->output+".tri";
-    // a->output = a->output+".skg";
-    // fastText.train(a);
-
-    // std::cout << "Cleaning temporal files ..." <<std::endl;
-    // // remove(a->input.c_str());
+    remove(a->input.c_str());
 
     exit(0);
 }
