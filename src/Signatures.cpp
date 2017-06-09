@@ -183,14 +183,14 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 rx = uni(rng);
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
                 pkmer = toCSkmer.substr(rx, kmer_size);
-                // if(signature_hash_full.count(pkmer)>0){
-                    pre_buffer+=' '+pkmer;
+                pre_buffer+=' '+pkmer;
+                if(signature_hash_full.count(pkmer)>0){
                     manykmers++;
-                // }
+                }
                 pkmer.clear();
             }
 
-            if(manykmers>5){
+            if(manykmers>=0){
 
                 // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
                 buffer+=pre_buffer+'\n';

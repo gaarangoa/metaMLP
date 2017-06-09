@@ -170,7 +170,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
             ks = rProt.substr(i, k);
             kmers[ks][prelabel]=true;
             // fos << ks+' ';
-            if(i % 10 == 0 && i>0){
+            if(i % 20 == 0 && i>0){
                 fo << ks+' ' << std::endl;
                 
                 fo << label << '\t';

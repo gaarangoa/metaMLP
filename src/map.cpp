@@ -260,8 +260,6 @@ void index(int argc, char **argv){
     a->minCount = 0;
     a->dim = 10;
     a->wordNgrams = 1;
-    // a->minn = 3;
-    // a->maxn = 6;
     fastText.train(a);
 
     std::cout << "Cleaning temporal files ..." <<std::endl;
