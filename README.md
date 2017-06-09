@@ -29,6 +29,7 @@ predX can be used to annotate other functional categories apart of Antibiotic Re
         -output       Output index
         -kmer         k-mer size in aminoacids [default 11]
         -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)
+        -NoReduced    Dissable the reduced alphabet and use all 20 Amino Acids
 
 #### Annotation
         usage: predX quant <args>
@@ -40,7 +41,9 @@ predX can be used to annotate other functional categories apart of Antibiotic Re
         -output       output file to write the processed reads
         -proc         Number of threads to use [default 8]
         -kmer         k-mer size [default 11 - same kmer used in predX index]
-        -seed         seed size [default 5 - amino acids]
+        -seed         seed size [default 11 - amino acids]
+        -mink         minimum number of kmers that each read has to contain [default 5]
+        -NoReduced    Enable it if index is built with the -NoReduced option
 
 To create the index of the Antibiotic Resistance profiling, you can use our developed database [1] (please check the publication). 
 

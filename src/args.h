@@ -25,12 +25,14 @@ class Args {
     std::string input;
     std::string test;
     std::string output;
-    std::string kmer;
-    std::string proc;
+    int kmer;
+    int proc;
     std::string smodel;
     std::string db;
-    std::string labp;
-    std::string seed;
+    int labp;
+    int seed;
+    int mink;
+    bool reduced;
 
     double lr;
     int lrUpdateRate;

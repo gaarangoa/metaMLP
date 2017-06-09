@@ -37,11 +37,13 @@ Args::Args() {
   verbose = 2;
   pretrainedVectors = "";
   saveOutput = 0;
-  kmer = "11";
-  proc = "8";
-  labp = "4";
-  seed = "11";
+  kmer = 11;
+  proc = 4;
+  labp = 4;
+  seed = 11;
   db = "";
+  mink = 5;
+  reduced = true;
 
   qout = false;
   retrain = false;
@@ -74,19 +76,23 @@ void Args::parseArgs(int argc, char** argv) {
       printHelp();
       exit(EXIT_FAILURE);
     } else if (strcmp(argv[ai], "-seed") == 0) {
-      seed = std::string(argv[ai + 1]);
-    } else if (strcmp(argv[ai], "-labp") == 0) {
-      labp = std::string(argv[ai + 1]);
+      seed = atoi(argv[ai + 1]);
+    } else if (strcmp(argv[ai], "-mink") == 0) {
+      seed = atoi(argv[ai + 1]);
+    }  else if (strcmp(argv[ai], "-labp") == 0) {
+      labp = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-input") == 0) {
       input = std::string(argv[ai + 1]);
+    }else if (strcmp(argv[ai], "-NoReduced") == 0) {
+      reduced = false;
     } else if (strcmp(argv[ai], "-db") == 0) {
       db = std::string(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-model") == 0) {
       smodel = std::string(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-kmer") == 0) {
-      kmer = std::string(argv[ai + 1]);
+      kmer = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-proc") == 0) {
-      proc = std::string(argv[ai + 1]);
+      proc = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-test") == 0) {
       test = std::string(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-output") == 0) {

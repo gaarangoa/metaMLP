@@ -45,8 +45,9 @@ class Signatures {
         int seed_size;
         bool isreduced;
         
+        std::shared_ptr<fasttext::Args> args;
 
-        Signatures(std::string file_signatures, std::string file_model, int kmer_size, int seed_size, bool isreduced);
+        Signatures(std::shared_ptr<fasttext::Args>);
         void predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::StringSet<seqan::CharString> &ids, std::vector<std::string>& readLabels, std::string& buffer, std::unordered_map < std::string, std::tuple < std::string, float > >& FuncPred);
         void Display(std::string message);
    

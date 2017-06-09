@@ -26,13 +26,15 @@ std::vector<std::string> splitx(const std::string &s, char delim) {
 
 // Constructor 
 // Load the signatures from the input file
-Signatures::Signatures(std::string file_sig, std::string fModel, int kmer_s, int seed_s, bool isredu){
+Signatures::Signatures(std::shared_ptr<fasttext::Args> a){
     
-    file_model = fModel;
+    args = a;
+
+    file_model = a->smodel;
     fsignatures = file_model+".kh";
-    kmer_size = kmer_s;
-    seed_size = seed_s;
-    isreduced = isredu;
+    kmer_size = a->kmer;
+    seed_size = a->seed;
+    isreduced = a->reduced;
 
     /////////////////////////////////////////////////////
     /*.............LOADING FASTTEXT MODEL.........*/
@@ -40,20 +42,6 @@ Signatures::Signatures(std::string file_sig, std::string fModel, int kmer_s, int
     
     std::cout<<"Loading Fast Text Model ... \n";
     fasttext.loadModel(file_model+".bin");
-    // std::cout<<"Loading Skipgram Model ... \n";
-    // skipgram.loadModel(file_model+".skg.bin");
-
-    // fasttext::Vector queryVec(skipgram.args_->dim);
-    // fasttext::Matrix wordVectors(skipgram.dict_->nwords(), skipgram.args_->dim);
-    // skipgram.precomputeWordVectors(wordVectors);
-    
-    // std::string kpis = "AEISIGEEKIK";
-    // std::set<std::string> banSet;
-    // banSet.insert(kpis);
-    // skipgram.getVector(queryVec, kpis);
-    // skipgram.findNN(wordVectors, queryVec, 10, banSet);
-
-    // skipgram.nn(1, "AEISIGEEKIK");
     
     //////////////////////////////////////////////////////
     /*.............LOADING SIGNATURES TO MEMORY.........*/
@@ -165,7 +153,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             // ishash = 0;
             while(1){
                 rx = uni(rng);
-                KMER = toCSkmer.substr(rx, seed_size);
+                KMER = toCSkmer.substr(rx, args->seed);
                 ishash = signature_hash.count(KMER);
                 if(ishash>0) break;
                 if(tries == 20) break;
@@ -182,7 +170,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             for(int ki=0; ki<30; ki++){
                 rx = uni(rng);
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
-                pkmer = toCSkmer.substr(rx, kmer_size);
+                pkmer = toCSkmer.substr(rx, args->kmer);
                 pre_buffer+=' '+pkmer;
                 if(signature_hash_full.count(pkmer)>0){
                     manykmers++;
@@ -190,7 +178,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 pkmer.clear();
             }
 
-            if(manykmers>=0){
+            if(manykmers>=args->mink){
 
                 // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
                 buffer+=pre_buffer+'\n';
