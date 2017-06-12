@@ -2,7 +2,6 @@
 #include "Signatures.cpp"
 #include "Index.cpp"
 #include "args.h"
-#include "hdf5/H5Cpp.h"
 
 //Standard namespace declaration
 using namespace std;
