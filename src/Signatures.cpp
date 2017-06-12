@@ -151,13 +151,13 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         int tries=0;
         // if(ishash>0){
             // ishash = 0;
-            rx=0;
-            while(rx<length(*it)-seed_size-1){
-                // rx = uni(rng);
+            // rx=0;
+            while(1){
+                rx = uni(rng);
                 KMER = toCSkmer.substr(rx, args->seed);
                 ishash = signature_hash.count(KMER);
                 if(ishash>0) break;
-                // if(tries == 20) break;
+                if(tries == 20) break;
                 tries++;
                 rx++;
             }
