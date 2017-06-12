@@ -82,6 +82,8 @@ void quant(int argc, char **argv){
     std::shared_ptr<fasttext::Args> a = std::make_shared<fasttext::Args>();
     a->parseArgs(argc, argv);
 
+    // std::cout << a->mink << std::endl;
+
     std::string report_file = a->output;
     int NUM_THREADS = a->proc;
 

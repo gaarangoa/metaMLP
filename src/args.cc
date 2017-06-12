@@ -78,7 +78,7 @@ void Args::parseArgs(int argc, char** argv) {
     } else if (strcmp(argv[ai], "-seed") == 0) {
       seed = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-mink") == 0) {
-      seed = atoi(argv[ai + 1]);
+      mink = atoi(argv[ai + 1]);
     }  else if (strcmp(argv[ai], "-labp") == 0) {
       labp = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-input") == 0) {
