@@ -159,7 +159,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 if(ishash>0) break;
                 if(tries == 20) break;
                 tries++;
-                rx++;
+                // rx++;
             }
         // }
 
