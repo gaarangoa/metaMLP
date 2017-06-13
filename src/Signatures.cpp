@@ -138,7 +138,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         toCSkmer = seqan::toCString(kimer);
         
         // If the read has a stop codon, go to next reading frame:
-        stop_c = toCSkmer.find_first_of('*');
+        // stop_c = toCSkmer.find_first_of('*');
         if(stop_c<33) continue;
         l = toCSkmer.length();
 
