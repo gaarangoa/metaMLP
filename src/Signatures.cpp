@@ -115,9 +115,10 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     std::size_t stop_c;
 
     std::string pkmer; 
+    std::string pseed;
 
     int l=0;
-    int ishash;
+    int ishash=0;
     // mtx.lock();
     for( AIter it=begin(aaSeqs); it!=end(aaSeqs); ++it){
 
@@ -146,7 +147,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         // KMER = toCSkmer.substr(rx, kmer_size);
 
         // ishash = signature_hash_full.count(KMER.substr(0,kmer_size));
-        
+        ishash = 0;
         // make n tries to get the right kmer from the read
         int tries=0;
         // if(ishash>0){
@@ -165,16 +166,18 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
         // std::cout << ishash << "\t" << KMER << std::endl;
 
+        int manykmers = 0;
         // Got a kmer at all?, great, make a sentence and predict!! :)
         if(ishash>0){
             pre_buffer = KMER;
-            int manykmers = 0;
+            
             for(int ki=0; ki<20; ki++){
                 rx = uni(rng);
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
                 pkmer = toCSkmer.substr(rx, args->kmer);
+                pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer+=' '+pkmer;
-                if(signature_hash_full.count(pkmer)>0){
+                if(signature_hash.count(pseed)>0){
                     manykmers++;
                 }
                 pkmer.clear();

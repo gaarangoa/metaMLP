@@ -171,6 +171,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
             kmers[ks][prelabel]=true;
             // fos << ks+' ';
             if(i % 20 == 0 && i>0){
+                
                 fo << ks+' ' << std::endl;
                 fo << label << '\t';
                 // TODO: here add it if you want to put the labels information
