@@ -356,7 +356,7 @@ void FastText::predict(std::istream& in, int32_t k,
 
 // }
 
-void FastText::predict(std::istream& in, int32_t k, bool print_prob, std::vector<std::string> ReadLabels, int tid, std::unordered_map < std::string, std::tuple < std::string, float > >& FuncPred, std::vector<std::string> ReadSeqs) {
+void FastText::predict(std::istream& in, int32_t k, bool print_prob, std::vector<std::string> ReadLabels, int tid, std::unordered_map < std::string, std::tuple < std::string, float > >& FuncPred, std::vector<std::string> ReadSeqs, bool addSeq) {
   std::vector<std::pair<real,std::string>> predictions;
   
   // std::ofstream foid(fout+".ARG.abn");
@@ -382,7 +382,12 @@ void FastText::predict(std::istream& in, int32_t k, bool print_prob, std::vector
 
         if( std::get<1>( FuncPred[ReadLabels[position]] ) < exp(it->first) ){
           std::get<1>(ItemValue) = exp(it->first);
-          std::get<0>(ItemValue) = it->second+'\t'+ReadSeqs[position];
+          if(addSeq){
+            std::get<0>(ItemValue) = it->second+'\t'+ReadSeqs[position];
+          }else{
+            std::get<0>(ItemValue) = it->second;
+          }
+          
           FuncPred[ReadLabels[position]] = ItemValue;
         }
 
@@ -390,7 +395,12 @@ void FastText::predict(std::istream& in, int32_t k, bool print_prob, std::vector
       //   // If the read does not exists, just, create a new entry
 
         std::get<1>(ItemValue) = exp(it->first);
-        std::get<0>(ItemValue) = it->second+'\t'+ReadSeqs[position];
+        if(addSeq){
+          std::get<0>(ItemValue) = it->second+'\t'+ReadSeqs[position];
+        }else{
+          std::get<0>(ItemValue) = it->second;
+        }
+        
         FuncPred[ReadLabels[position]] = ItemValue;
       
       }

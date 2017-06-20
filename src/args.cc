@@ -44,6 +44,7 @@ Args::Args() {
   db = "";
   mink = 5;
   reduced = true;
+  seq=false;
 
   qout = false;
   retrain = false;
@@ -75,6 +76,8 @@ void Args::parseArgs(int argc, char** argv) {
       std::cerr << "Here is the help! Usage:" << std::endl;
       printHelp();
       exit(EXIT_FAILURE);
+    } else if (strcmp(argv[ai], "-seq") == 0) {
+      seq = true;
     } else if (strcmp(argv[ai], "-seed") == 0) {
       seed = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-mink") == 0) {

@@ -192,7 +192,9 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 readLabels.push_back(seqan::toCString(ids[total_reads]));
                 std::stringstream iseq;
                 iseq << seqs[total_reads];
-                readSeqs.push_back(iseq.str());
+                if(args->seq){
+                    readSeqs.push_back(iseq.str());
+                }
                 protSeqs.push_back(toCSkmer);
                 num_reads++;
             }
@@ -204,7 +206,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     //  mtx.unlock();
     // std::unordered_map < std::string, std::tuple < std::string, float > > FuncPredLocal;
     std::stringstream trex(buffer);
-    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs);
+    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
     
     // std::cout << seqan::length(readLabels) << "\t" << seqan::length(readSeqs) << std::endl;
     // mtx.lock();

@@ -57,6 +57,7 @@ class Args {
     int saveOutput;
 
     bool qout;
+    bool seq;
     bool retrain;
     bool qnorm;
     size_t cutoff;

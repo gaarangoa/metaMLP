@@ -26,6 +26,7 @@ void printPredictUsage() {
     << "  -kmer         k-mer size [default 11 - same kmer used in predX index]\n"
     << "  -seed         seed size [default 11 - amino acids]\n"
     << "  -mink         minimum number of kmers that each read has to contain [default 5]\n"
+    << "  -seq          Include the read sequence in the output file [useful for downstream analysis]\n"
     << "  -NoReduced    Enable it if index is built with the -NoReduced option\n"
     << std::endl;
 }
@@ -95,6 +96,9 @@ void quant(int argc, char **argv){
     // Load the signatures in json format kmer-size
     Signatures signatures(a);
     
+    // absolute abundance
+    tsl::hopscotch_map< std::string, int> absolute_abundance;
+    
     // Load Fasta File
     std::ifstream input(a->input);
     seqan::SeqFileIn seqFileIn(seqan::toCString(a->input));
@@ -117,7 +121,13 @@ void quant(int argc, char **argv){
 
         int arglike=0;
         for(const auto& arglabel: FuncPred){
-            fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
+            // print file with sequences and probabilities
+            if(a->seq){
+                fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
+            }
+
+            // compute absolute abundance
+
             arglike++;
         }
         fo.close();
@@ -217,7 +227,14 @@ void quant(int argc, char **argv){
     int arglike=0;
     for (int i=0; i<=ith; i++){
         for(const auto& arglabel: td[i].FuncPred){
-            fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
+            // report sequences (not to compute the absolute abundance)
+            if(a->seq){
+                fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
+            }else{
+                if(std::get<1>(arglabel.second)>0.5){
+                    absolute_abundance[std::get<0>(arglabel.second)]+=1;
+                }
+            }
             arglike++;
         }
     }

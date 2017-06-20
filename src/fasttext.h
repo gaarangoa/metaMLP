@@ -83,7 +83,7 @@ class FastText {
     std::vector<int32_t> selectEmbeddings(int32_t) const;
     void quantize(std::shared_ptr<Args>);
     void test(std::istream&, int32_t);
-    void predict(std::istream&, int32_t, bool, std::vector<std::string>, int, std::unordered_map < std::string, std::tuple < std::string, float > >&, std::vector<std::string>);
+    void predict(std::istream&, int32_t, bool, std::vector<std::string>, int, std::unordered_map < std::string, std::tuple < std::string, float > >&, std::vector<std::string>, bool);
     void predict(
         std::istream&,
         int32_t,
