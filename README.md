@@ -2,7 +2,7 @@
 PredX is a fast approach to annotate antimicrobial resistance from metagenomics short sequence reads. It compares sequence reads against a protein database, similar to what blastx does. However, instead of performing sequence alignment, it uses a linear classifier using word embeddings (kmer embeddings) to represent kmers as vectors. We use the FastText library to perform text classification and the seqan library to perform the six reading frame translation. To index protein sequences (reference database) we use the reduced alphabet proposed by RAPSearch. PredX is several orders of magnituf fast than blastx, diamond and deepARG. However, it is not designed to annotate low-similarity sequences (deepARG wins here!!).
 
 ### Status
-In development and you shouldn't be able to see this repository!!
+In development-testing close to release, and you shouldn't be able to see this repository!!
 
 ## Installation
 ARGfast does not require any external library, so, it can be installed by just typing: 
