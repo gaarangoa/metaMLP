@@ -117,8 +117,9 @@ void quant(int argc, char **argv){
         seqan::readRecords(ids, seqs, seqFileIn);
         signatures.predict(seqs, ids, readLabels, buffer, FuncPred);
 
+        
         std::ofstream fo(report_file);
-
+        
         int arglike=0;
         for(const auto& arglabel: FuncPred){
             // print file with sequences and probabilities
@@ -130,7 +131,9 @@ void quant(int argc, char **argv){
 
             arglike++;
         }
+        
         fo.close();
+        
 
         std::cout << "[***********************] 100%\n";
         std::cout << ith+1 << " threads used from " << NUM_THREADS << std::endl;
@@ -239,7 +242,15 @@ void quant(int argc, char **argv){
         }
     }
 
+    if(!a->seq){
+        for(const auto& item:absolute_abundance){
+            fo << item.first <<"\t"<< std::to_string(item.second)<<std::endl;
+        }
+    }
+
     fo.close();
+
+
 
     std::cout << "[***********************] "<< entries <<" reads 100%\n";
     std::cout << ith+1 << " threads used from " << NUM_THREADS << std::endl;
