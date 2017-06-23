@@ -179,8 +179,10 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 pkmer = toCSkmer.substr(rx, args->kmer);
                 // pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer+=' '+pkmer;
-                if(master_signature_hash_full.count(pkmer)>0){
-                    manykmers++;
+                if(manykmers<=args->mink){
+                    if(master_signature_hash_full.count(pkmer)>0){
+                        manykmers++;
+                    }
                 }
                 pkmer.clear();
             }
