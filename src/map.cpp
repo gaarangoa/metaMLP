@@ -85,7 +85,9 @@ void quant(int argc, char **argv){
     // std::cout << a->mink << std::endl;
 
     std::string report_file = a->output;
+     
     int NUM_THREADS = a->proc;
+    if(a->proc == 1) NUM_THREADS = 2;
 
     std::thread threads[NUM_THREADS];
     struct thread_data td[NUM_THREADS];
@@ -109,39 +111,6 @@ void quant(int argc, char **argv){
     int iseq=0;
     int entries=0;
     
-    if(NUM_THREADS==1){
-        std::vector<std::string> readLabels;
-        std::string buffer;
-        std::unordered_map < std::string, std::tuple < std::string, float > > FuncPred;
-        
-        seqan::readRecords(ids, seqs, seqFileIn);
-        signatures.predict(seqs, ids, readLabels, buffer, FuncPred);
-
-        
-        std::ofstream fo(report_file);
-        
-        int arglike=0;
-        for(const auto& arglabel: FuncPred){
-            // print file with sequences and probabilities
-            if(a->seq){
-                fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
-            }
-
-            // compute absolute abundance
-
-            arglike++;
-        }
-        
-        fo.close();
-        
-
-        std::cout << "[***********************] 100%\n";
-        std::cout << ith+1 << " threads used from " << NUM_THREADS << std::endl;
-        std::cout << length(ids) << " processed reads " << std::endl;
-        std::cout << arglike << " ARG-like reads " << std::endl;
-
-        exit(0);
-    }
 
     // ********************************************************************************************************
     // MAP SECTION
@@ -227,6 +196,8 @@ void quant(int argc, char **argv){
 
     // printout results:
     std::ofstream fo(report_file);
+    std::ofstream fabn(report_file+'.abn');
+
     int arglike=0;
     for (int i=0; i<=ith; i++){
         for(const auto& arglabel: td[i].FuncPred){
@@ -242,12 +213,13 @@ void quant(int argc, char **argv){
         }
     }
 
-    if(!a->seq){
+    // if(!a->seq){
         for(const auto& item:absolute_abundance){
-            fo << item.first <<"\t"<< std::to_string(item.second)<<std::endl;
+            fabn << item.first <<"\t"<< std::to_string(item.second)<<std::endl;
         }
-    }
-
+    // }
+    
+    fabn.close();
     fo.close();
 
 
