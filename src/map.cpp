@@ -214,9 +214,9 @@ void quant(int argc, char **argv){
     }
 
     // if(!a->seq){
-        for(const auto& item:absolute_abundance){
+    for(const auto& item:absolute_abundance){
             fabn << item.first <<"\t"<< std::to_string(item.second)<<std::endl;
-        }
+    }
     // }
 
     fabn.close();
