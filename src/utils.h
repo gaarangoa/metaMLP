@@ -11,6 +11,11 @@
 #define FASTTEXT_UTILS_H
 
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <ios>
+#include <vector>
 
 namespace fasttext {
 

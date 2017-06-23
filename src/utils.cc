@@ -8,11 +8,7 @@
  */
 
 #include "utils.h"
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <ios>
+
 
 namespace fasttext {
 
