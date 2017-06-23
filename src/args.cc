@@ -42,7 +42,7 @@ Args::Args() {
   labp = 4;
   seed = 11;
   db = "";
-  mink = 5;
+  mink = 3;
   reduced = true;
   seq=false;
 
