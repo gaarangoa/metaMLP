@@ -196,7 +196,7 @@ void quant(int argc, char **argv){
 
     // printout results:
     std::ofstream fo(report_file);
-    std::ofstream fabn(report_file+'.abn');
+    std::ofstream fabn(report_file+".abn");
 
     int arglike=0;
     for (int i=0; i<=ith; i++){
@@ -218,7 +218,7 @@ void quant(int argc, char **argv){
             fabn << item.first <<"\t"<< std::to_string(item.second)<<std::endl;
         }
     // }
-    
+
     fabn.close();
     fo.close();
 
