@@ -26,7 +26,7 @@ void printPredictUsage() {
     << "  -kmer         k-mer size [default 11 - same kmer used in predX index]\n"
     << "  -seed         seed size [default 11 - amino acids]\n"
     << "  -mink         minimum number of kmers that each read has to contain [default 3]\n"
-    << "  -seq          Report sequence classifications, by default it reports the absolute abundance\n"
+    << "  -seq          Report sequence classifications [-seq 1 to report sequences]\n"
     << "  -NoReduced    Enable it if index is built with the -NoReduced option\n"
     << std::endl;
 }
