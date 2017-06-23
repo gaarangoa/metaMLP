@@ -220,9 +220,14 @@ void quant(int argc, char **argv){
         }
     }
 
-    // if(!a->seq){
+    // if(!a->seq){= 
+    std::stringstream ARGc;
+    std::string HMP;
     for(const auto& item:absolute_abundance){
-            fabn << item.first <<"\t"<< std::to_string(item.second)<<std::endl;
+            ARGc << item.first;
+            HMP = ARGc.str();
+            fabn << HMP.replace(HMP.length()-2,HMP.length(),"").replace(0,9,"") <<"\t"<< std::to_string(item.second)<<std::endl;
+            ARGc.str(std::string());
     }
     // }
 
