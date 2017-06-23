@@ -39,7 +39,7 @@ class Signatures {
         std::vector < std::stringstream > KMER_LIST;
         
         tsl::hopscotch_map< std::string, bool> master_signature_hash; // 7-mer
-        tsl::hopscotch_map< std::string, std::string> master_signature_hash_full; //11-mer
+        tsl::hopscotch_map< std::string, bool> master_signature_hash_full; //11-mer
         
         int kmer_size;
         int seed_size;

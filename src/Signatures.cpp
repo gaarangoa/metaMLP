@@ -55,7 +55,7 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a){
     while( std::getline( ifs, line ) ){
         iline = splitx(line, '\t');
         master_signature_hash[iline[0].substr(0,seed_size)] = true;
-        master_signature_hash_full[iline[0].substr(0,kmer_size)] = iline[1];
+        master_signature_hash_full[iline[0].substr(0,kmer_size)] = true;//iline[1];
     }
     ifs.close();
 
@@ -73,8 +73,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     std::vector<std::string> readSeqs;
     std::vector<std::string> protSeqs;
 
-    tsl::hopscotch_map< std::string, bool > signature_hash = master_signature_hash;
-    tsl::hopscotch_map< std::string, std::string > signature_hash_full = master_signature_hash_full;
+    // tsl::hopscotch_map< std::string, bool > signature_hash = master_signature_hash;
+    // tsl::hopscotch_map< std::string, bool > signature_hash_full = master_signature_hash_full;
 
     int num_reads = 1;
     int total_reads = 0;
@@ -156,7 +156,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             while(1){
                 rx = uni(rng);
                 KMER = toCSkmer.substr(rx, args->seed);
-                ishash = signature_hash.count(KMER);
+                ishash = master_signature_hash.count(KMER);
                 if(ishash>0) break;
                 if(tries == 20) break;
                 tries++;
@@ -177,7 +177,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 pkmer = toCSkmer.substr(rx, args->kmer);
                 pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer+=' '+pkmer;
-                if(signature_hash.count(pseed)>0){
+                if(master_signature_hash.count(pseed)>0){
                     manykmers++;
                 }
                 pkmer.clear();
@@ -195,7 +195,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 if(args->seq){
                     readSeqs.push_back(iseq.str());
                 }
-                protSeqs.push_back(toCSkmer);
+                // protSeqs.push_back(toCSkmer);
                 num_reads++;
             }
 
@@ -203,6 +203,10 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
     }
     
+    seqan::clear(seqs);
+    seqan::clear(aaSeqs);
+    seqan::clear(ids);
+
     //  mtx.unlock();
     // std::unordered_map < std::string, std::tuple < std::string, float > > FuncPredLocal;
     std::stringstream trex(buffer);
@@ -214,9 +218,11 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     // mtx.unlock();
 
     trex.str(std::string());
-    readLabels.clear();
+    readLabels.clear(); 
+    readSeqs.clear();
     buffer.clear();
-    signature_hash.clear();
+    // signature_hash.clear();
+    // signature_hash_full.clear();
     seqan::clear(aaSeqs);
     
 }
