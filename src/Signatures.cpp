@@ -120,6 +120,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     int l=0;
     int ishash=0;
     // mtx.lock();
+    int iframe = 0;
     for( AIter it=begin(aaSeqs); it!=end(aaSeqs); ++it){
 
         KMER.clear();
@@ -158,7 +159,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 KMER = toCSkmer.substr(rx, args->seed);
                 ishash = master_signature_hash.count(KMER);
                 if(ishash>0) break;
-                if(tries == 20) break;
+                // if(tries == l-kmer_size) break;
+                if(tries == 5) break;
                 tries++;
                 // rx++;
             }
@@ -175,9 +177,9 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 rx = uni(rng);
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
                 pkmer = toCSkmer.substr(rx, args->kmer);
-                pseed = toCSkmer.substr(rx, args->seed);
+                // pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer+=' '+pkmer;
-                if(master_signature_hash.count(pseed)>0){
+                if(master_signature_hash_full.count(pkmer)>0){
                     manykmers++;
                 }
                 pkmer.clear();
@@ -186,20 +188,28 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             if(manykmers>=args->mink){
 
                 // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
-                buffer+=pre_buffer+'\n';
-                pre_buffer.clear();
                 
-                readLabels.push_back(seqan::toCString(ids[total_reads]));
-                std::stringstream iseq;
-                iseq << seqs[total_reads];
-                if(args->seq){
-                    readSeqs.push_back(iseq.str());
+                if( length(ids[total_reads]) > 1){
+                    // Check if the read has a proper header
+                    buffer+=pre_buffer+'\n';
+                    pre_buffer.clear();
+                    
+                    readLabels.push_back(seqan::toCString(ids[total_reads]));
+                    std::stringstream iseq;
+                    iseq << seqs[total_reads];
+                    if(args->seq){
+                        readSeqs.push_back(iseq.str());
+                    }
+
+                    num_reads++;
                 }
-                // protSeqs.push_back(toCSkmer);
-                num_reads++;
+                
             }
 
         }
+    
+        // seqan::clear(aaSeqs[iframe]);
+        iframe++;
 
     }
     
@@ -210,6 +220,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     //  mtx.unlock();
     // std::unordered_map < std::string, std::tuple < std::string, float > > FuncPredLocal;
     std::stringstream trex(buffer);
+    buffer.clear();
     fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
     
     // std::cout << seqan::length(readLabels) << "\t" << seqan::length(readSeqs) << std::endl;
@@ -220,7 +231,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     trex.str(std::string());
     readLabels.clear(); 
     readSeqs.clear();
-    buffer.clear();
+    // buffer.clear();
     // signature_hash.clear();
     // signature_hash_full.clear();
     seqan::clear(aaSeqs);

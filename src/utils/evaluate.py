@@ -6,13 +6,13 @@ minp = float(sys.argv[3])
 
 predicted = [];
 
-for i in open(sys.argv[1]):
+for ix,i in enumerate(open(sys.argv[1])):
     i=i.split();
     try:
         if float(i[3]) < minp: continue
         predicted.append([i[0].split("|")[idx], i[1].replace('__label__',"").replace('__',"")])
     except:
-        print i
+        print i, ix
         pass
 
 # # Get the total counts for the predicted class:

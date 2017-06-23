@@ -407,7 +407,6 @@ void FastText::predict(std::istream& in, int32_t k, bool print_prob, std::vector
 
 
       // absolute_abundance[it->second]++;
-            
       if (print_prob) {
         // std::cout << " " << exp(it->first);
       }

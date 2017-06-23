@@ -278,10 +278,10 @@ void index(int argc, char **argv){
     a->model = fasttext::model_name::sup;
     a->loss = fasttext::loss_name::hs;
     a->input = a->output+".tr";
-    a->epoch = 50;
+    a->epoch = 100;
     a->lr = 1;
-    a->minCount = 0;
-    a->dim = 10;
+    a->minCount = 1;
+    a->dim = 50;
     a->wordNgrams = 1;
     fastText.train(a);
 
