@@ -2,6 +2,7 @@
 #include "Signatures.cpp"
 #include "Index.cpp"
 #include "args.h"
+#include "utils.h"
 
 //Standard namespace declaration
 using namespace std;
@@ -98,8 +99,6 @@ void quant(int argc, char **argv){
     // Load the signatures in json format kmer-size
     Signatures signatures(a);
     
-    // absolute abundance
-    tsl::hopscotch_map< std::string, int> absolute_abundance;
     
     // Load Fasta File
     std::ifstream input(a->input);
@@ -198,17 +197,24 @@ void quant(int argc, char **argv){
     std::ofstream fo(report_file);
     std::ofstream fabn(report_file+".abn");
 
+    // absolute abundance
+    tsl::hopscotch_map< std::string, int> absolute_abundance;
+
+    std::vector<std::string> sep;
+
     int arglike=0;
     for (int i=0; i<=ith; i++){
         for(const auto& arglabel: td[i].FuncPred){
             // report sequences (not to compute the absolute abundance)
             if(a->seq){
                 fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
-            }else{
-                if(std::get<1>(arglabel.second)>0.5){
-                    absolute_abundance[std::get<0>(arglabel.second)]+=1;
-                }
             }
+
+            if(std::get<1>(arglabel.second)>0.5){
+                sep = fasttext::utils::splitString(std::get<0>(arglabel.second),'\t');
+                absolute_abundance[sep[0]]+=1;
+            }
+
             arglike++;
         }
     }
