@@ -174,7 +174,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             pre_buffer = KMER;
             
             for(int ki=0; ki<20; ki++){
-                rx = uni(rng);
+                // rx = uni(rng);
+                rx = ki;
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
                 pkmer = toCSkmer.substr(rx, args->kmer);
                 // pseed = toCSkmer.substr(rx, args->seed);
