@@ -29,4 +29,5 @@
 *.app
 
 .vscode/
-bin/predX
+bin/
+test/
