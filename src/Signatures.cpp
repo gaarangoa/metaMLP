@@ -160,7 +160,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 ishash = master_signature_hash.count(KMER);
                 if(ishash>0) break;
                 // if(tries == l-kmer_size) break;
-                if(tries == args->tries) break;
+                if(tries == 10) break;
                 tries++;
                 // rx++;
             }
