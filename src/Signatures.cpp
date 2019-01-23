@@ -46,6 +46,8 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a){
     //////////////////////////////////////////////////////
     /*.............LOADING SIGNATURES TO MEMORY.........*/
     //////////////////////////////////////////////////////
+    std:cout<< "here the flag \n";
+    std::cout<< a->tries;
     std::cout<<"Loading Signatures ... \n";
 
     std::ifstream ifs(fsignatures);
@@ -160,7 +162,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 ishash = master_signature_hash.count(KMER);
                 if(ishash>0) break;
                 // if(tries == l-kmer_size) break;
-                if(tries == 10) break;
+                if(tries == args->tries) break;
                 tries++;
                 // rx++;
             }

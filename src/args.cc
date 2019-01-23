@@ -80,13 +80,13 @@ void Args::parseArgs(int argc, char** argv) {
     } else if (strcmp(argv[ai], "-seq") == 0) {
       seq = true;
     } else if (strcmp(argv[ai], "-seed") == 0) {
-      seed = atoi(argv[ai + 1]);
+        seed = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-mink") == 0) {
-      mink = atoi(argv[ai + 1]);
+        mink = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-tries") == 0) {
-      tries = atoi(argv[ai + 1]);
+        tries = atoi(argv[ai + 1]);
     }  else if (strcmp(argv[ai], "-labp") == 0) {
-      labp = atoi(argv[ai + 1]);
+        labp = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-input") == 0) {
       input = std::string(argv[ai + 1]);
     }else if (strcmp(argv[ai], "-NoReduced") == 0) {
