@@ -43,9 +43,10 @@ Args::Args() {
   seed = 11;
   db = "";
   mink = 3;
-  tries = 5;
+  tries = 1;
   reduced = true;
   seq=false;
+  minSeqLen = 100;
 
   qout = false;
   retrain = false;
@@ -83,6 +84,8 @@ void Args::parseArgs(int argc, char** argv) {
         seed = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-mink") == 0) {
         mink = atoi(argv[ai + 1]);
+    } else if (strcmp(argv[ai], "-minSeqLen") == 0) {
+        minSeqLen = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-tries") == 0) {
         tries = atoi(argv[ai + 1]);
     }  else if (strcmp(argv[ai], "-labp") == 0) {

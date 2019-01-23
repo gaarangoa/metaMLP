@@ -29,7 +29,8 @@ void printPredictUsage() {
     << "  -mink         minimum number of kmers that each read has to contain [default 3]\n"
     << "  -seq          Report sequence classifications [-seq 1 to report sequences]\n"
     << "  -NoReduced    Enable it if index is built with the -NoReduced option\n"
-    << "  -tries        how many times tries to find a random seed [default 5]\n"
+    << "  -tries        how many times tries to find a random seed [default 1] increse it to find more hits\n"
+    << "  -minSeqLen    minimum sequence length of the sequences. It has to be greater than -kmer [default 100]\n"
     << std::endl;
 }
 
@@ -138,7 +139,7 @@ void quant(int argc, char **argv){
         entries++;
         seqan::readRecord(id, seq, seqFileIn);
 
-        if(length(seq)<100) continue;
+        if(length(seq) < a->minSeqLen) continue;
 
         seqan::appendValue(seqs, seq);
         seqan::appendValue(ids, id);

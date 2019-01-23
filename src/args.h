@@ -28,6 +28,7 @@ class Args {
     int kmer;
     int proc;
     int tries;
+    int minSeqLen;
     std::string smodel;
     std::string db;
     int labp;

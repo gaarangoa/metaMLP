@@ -46,8 +46,8 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a){
     //////////////////////////////////////////////////////
     /*.............LOADING SIGNATURES TO MEMORY.........*/
     //////////////////////////////////////////////////////
-    std:cout<< "here the flag \n";
-    std::cout<< a->tries;
+    // std:cout<< "here the flag \n";
+    // std::cout<< a->tries;
     std::cout<<"Loading Signatures ... \n";
 
     std::ifstream ifs(fsignatures);
@@ -142,8 +142,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         toCSkmer = seqan::toCString(kimer);
 
         // If the read has a stop codon, go to next reading frame:
-        stop_c = toCSkmer.find_first_of('*');
-        if(stop_c<33) continue;
+        // stop_c = toCSkmer.find_first_of('*');
+        // if(stop_c<10) continue;
         l = toCSkmer.length();
 
         // Get kmer from a random position
