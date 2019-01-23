@@ -41,6 +41,7 @@ void printIndexUsage() {
     << "  -kmer         k-mer size in aminoacids [default 11]\n"
     << "  -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)\n"
     << "  -NoReduced    Dissable the reduced alphabet and use all 20 Amino Acids\n"
+    << "  -dim    word vector size (default 100)\n"
     << std::endl;
 }
 
@@ -86,7 +87,7 @@ void quant(int argc, char **argv){
     // std::cout << a->mink << std::endl;
 
     std::string report_file = a->output;
-     
+
     int NUM_THREADS = a->proc;
     if(a->proc == 1) NUM_THREADS = 2;
 
@@ -98,8 +99,8 @@ void quant(int argc, char **argv){
     // int kmer_size = stoi(kmer);
     // Load the signatures in json format kmer-size
     Signatures signatures(a);
-    
-    
+
+
     // Load Fasta File
     std::ifstream input(a->input);
     seqan::SeqFileIn seqFileIn(seqan::toCString(a->input));
@@ -109,7 +110,7 @@ void quant(int argc, char **argv){
     int ith=0;
     int iseq=0;
     int entries=0;
-    
+
 
     // ********************************************************************************************************
     // MAP SECTION
@@ -123,7 +124,7 @@ void quant(int argc, char **argv){
     // estimate the number of reads
     struct stat st;
     stat(a->input.c_str(), &st);
-    
+
     seqan::readRecord(id, seq, seqFileIn);
     int all_reads = int( st.st_size/( length(id)+length(seq) ) );
     int chunks = int(all_reads/NUM_THREADS);
@@ -132,17 +133,17 @@ void quant(int argc, char **argv){
     // std::vector < std::unordered_map < std::string, std::tuple < std::string, float > > > Predictions(NUM_THREADS);
 
     while (!atEnd(seqFileIn)){
-        
+
         entries++;
         seqan::readRecord(id, seq, seqFileIn);
-        
+
         if(length(seq)<100) continue;
-        
+
         seqan::appendValue(seqs, seq);
         seqan::appendValue(ids, id);
 
         if(ith==NUM_THREADS-1) continue;
-        
+
         if(iseq==chunks){
 
             std::cout << "["<< progress <<"] "<< entries << " reads " << 100*(ith+1)/NUM_THREADS <<"%\r";
@@ -167,18 +168,18 @@ void quant(int argc, char **argv){
         }else{
             iseq++;
         }
-    
-    
+
+
     }
 
-    // when the estimated # of reads is greater than the actual number of reads we need to add the last thread. 
+    // when the estimated # of reads is greater than the actual number of reads we need to add the last thread.
     std::cout << "["<< progress <<"] "<< entries << " reads " << 100*(ith+1)/NUM_THREADS <<"%\r";
     seqan::move(td[ith].seqs, seqs);
     seqan::move(td[ith].ids, ids);
     td[ith].signatures = &signatures;
     // td[ith].report = report_file;
     td[ith].tid = ith;
-    
+
     seqan::clear(seqs);
     seqan::clear(ids);
 
@@ -194,7 +195,7 @@ void quant(int argc, char **argv){
     // ********************************************************************************************************
 
     // printout results:
-    
+
     std::ofstream fo(report_file);
     std::ofstream fabn(report_file+".abn");
 
@@ -220,7 +221,7 @@ void quant(int argc, char **argv){
         }
     }
 
-    // if(!a->seq){= 
+    // if(!a->seq){=
     std::stringstream ARGc;
     std::string HMP;
     for(const auto& item:absolute_abundance){
@@ -240,7 +241,7 @@ void quant(int argc, char **argv){
     std::cout << ith+1 << " threads used from " << NUM_THREADS << std::endl;
     std::cout << entries << " processed reads " << std::endl;
     std::cout << arglike << " ARG-like reads " << std::endl;
-    
+
     exit(0);
 }
 
@@ -249,7 +250,7 @@ void index(int argc, char **argv){
             printIndexUsage();
             exit(0);
         }
-    
+
     std::shared_ptr<fasttext::Args> a = std::make_shared<fasttext::Args>();
     a->parseArgs(argc, argv);
     Index index;
@@ -265,7 +266,7 @@ void index(int argc, char **argv){
     a->epoch = 100;
     a->lr = 1;
     a->minCount = 1;
-    a->dim = 50;
+    // a->dim = 100;
     a->wordNgrams = 1;
     fastText.train(a);
 
@@ -277,7 +278,7 @@ void index(int argc, char **argv){
 
 //Main Function
 int main(int argc, char **argv)
-{ 
+{
     if (argc < 2) {
         printUsage();
         exit(0);
@@ -286,13 +287,13 @@ int main(int argc, char **argv)
     std::string command(argv[1]);
     if (command == "index" ) {
         index(argc, argv);
-    } else if (command == "quant") {        
+    } else if (command == "quant") {
         quant(argc, argv);
     } else {
         printUsage();
         exit(0);
     }
-    
+
     return 0;
 
 }
