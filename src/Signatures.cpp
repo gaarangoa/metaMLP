@@ -4,7 +4,7 @@
 using spp::sparse_hash_map;
 using namespace std;
 
-std::mutex mtx; 
+std::mutex mtx;
 
 // TODO!!: this split function is repeated in the INDEX.cpp, I have to move it to some common library so i can used it multiple times.
 template<typename Out>
@@ -24,10 +24,10 @@ std::vector<std::string> splitx(const std::string &s, char delim) {
 }
 // END:TODO!!
 
-// Constructor 
+// Constructor
 // Load the signatures from the input file
 Signatures::Signatures(std::shared_ptr<fasttext::Args> a){
-    
+
     args = a;
 
     file_model = a->smodel;
@@ -39,17 +39,17 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a){
     /////////////////////////////////////////////////////
     /*.............LOADING FASTTEXT MODEL.........*/
     /////////////////////////////////////////////////////
-    
+
     std::cout<<"Loading Fast Text Model ... \n";
     fasttext.loadModel(file_model+".bin");
-    
+
     //////////////////////////////////////////////////////
     /*.............LOADING SIGNATURES TO MEMORY.........*/
     //////////////////////////////////////////////////////
     std::cout<<"Loading Signatures ... \n";
-    
+
     std::ifstream ifs(fsignatures);
-    std::string line; 
+    std::string line;
     std::vector<std::string> iline;
 
     while( std::getline( ifs, line ) ){
@@ -78,7 +78,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
     int num_reads = 1;
     int total_reads = 0;
-    
+
     int read_length = 100;
 
     /////////////////////////////////////////////////////
@@ -92,16 +92,16 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         seqan::GeneticCode<seqan::CANONICAL> GCode;
         seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
     }
-    
+
 
     // std::cout << aaSeqs[5] << std::endl;
 
     typedef seqan::Iterator< seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<> > > >::Type AIter;
-    
+
     //////////////////////////////////////////////////////////////////////////////
     /*.............FILTER READS BY SIGNATURES AND CLASSIFY .........*/
     //////////////////////////////////////////////////////////////////////////////
-    std::random_device rd;   
+    std::random_device rd;
     std::mt19937 rng(rd());
     // std::uniform_int_distribution<int> uni(0, int(read_length/3)-seed_size-1);
     int frame = 1, rx;
@@ -114,7 +114,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
     std::size_t stop_c;
 
-    std::string pkmer; 
+    std::string pkmer;
     std::string pseed;
 
     int l=0;
@@ -131,14 +131,14 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         }else{
             frame++;
         }
-        
+
         std::uniform_int_distribution<int> uni(0, length(*it)-seed_size-1);
         rx = uni(rng); // random position
         // Move iterator to a string-like structure
-        
+
         seqan::move(kimer, *it);
         toCSkmer = seqan::toCString(kimer);
-        
+
         // If the read has a stop codon, go to next reading frame:
         stop_c = toCSkmer.find_first_of('*');
         if(stop_c<33) continue;
@@ -160,7 +160,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 ishash = master_signature_hash.count(KMER);
                 if(ishash>0) break;
                 // if(tries == l-kmer_size) break;
-                if(tries == 5) break;
+                if(tries == args->tries) break;
                 tries++;
                 // rx++;
             }
@@ -172,11 +172,11 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         // Got a kmer at all?, great, make a sentence and predict!! :)
         if(ishash>0){
             pre_buffer = KMER;
-            
+
             for(int ki=0; ki<l-args->kmer; ki++){
                 // rx = uni(rng);
                 rx = ki;
-                // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training. 
+                // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training.
                 pkmer = toCSkmer.substr(rx, args->kmer);
                 // pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer+=' '+pkmer;
@@ -191,12 +191,12 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             if(manykmers>=args->mink){
 
                 // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
-                
+
                 if( length(ids[total_reads]) > 1){
                     // Check if the read has a proper header
                     buffer+=pre_buffer+'\n';
                     pre_buffer.clear();
-                    
+
                     readLabels.push_back(seqan::toCString(ids[total_reads]));
                     std::stringstream iseq;
                     iseq << seqs[total_reads];
@@ -206,16 +206,16 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
                     num_reads++;
                 }
-                
+
             }
 
         }
-    
+
         // seqan::clear(aaSeqs[iframe]);
         iframe++;
 
     }
-    
+
     seqan::clear(seqs);
     seqan::clear(aaSeqs);
     seqan::clear(ids);
@@ -225,20 +225,20 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     std::stringstream trex(buffer);
     buffer.clear();
     fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
-    
+
     // std::cout << seqan::length(readLabels) << "\t" << seqan::length(readSeqs) << std::endl;
     // mtx.lock();
         // FuncPred = FuncPredLocal;
     // mtx.unlock();
 
     trex.str(std::string());
-    readLabels.clear(); 
+    readLabels.clear();
     readSeqs.clear();
     // buffer.clear();
     // signature_hash.clear();
     // signature_hash_full.clear();
     seqan::clear(aaSeqs);
-    
+
 }
 
 

@@ -27,6 +27,7 @@ class Args {
     std::string output;
     int kmer;
     int proc;
+    int tries;
     std::string smodel;
     std::string db;
     int labp;
@@ -49,7 +50,7 @@ class Args {
     int minn;
     int maxn;
     int thread;
-    
+
     double t;
     std::string label;
     int verbose;

@@ -17,11 +17,11 @@
 namespace fasttext {
 
 Args::Args() {
-  lr = 0.05;
+  lr = 1;
   dim = 100;
   ws = 5;
-  epoch = 5;
-  minCount = 5;
+  epoch = 100;
+  minCount = 1;
   minCountLabel = 0;
   neg = 5;
   wordNgrams = 1;
@@ -43,6 +43,7 @@ Args::Args() {
   seed = 11;
   db = "";
   mink = 3;
+  tries = 5;
   reduced = true;
   seq=false;
 
@@ -82,6 +83,8 @@ void Args::parseArgs(int argc, char** argv) {
       seed = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-mink") == 0) {
       mink = atoi(argv[ai + 1]);
+    } else if (strcmp(argv[ai], "-tries") == 0) {
+      tries = atoi(argv[ai + 1]);
     }  else if (strcmp(argv[ai], "-labp") == 0) {
       labp = atoi(argv[ai + 1]);
     } else if (strcmp(argv[ai], "-input") == 0) {

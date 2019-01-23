@@ -29,6 +29,7 @@ void printPredictUsage() {
     << "  -mink         minimum number of kmers that each read has to contain [default 3]\n"
     << "  -seq          Report sequence classifications [-seq 1 to report sequences]\n"
     << "  -NoReduced    Enable it if index is built with the -NoReduced option\n"
+    << "  -tries    how many times tries to find a random seed [default 5]\n"
     << std::endl;
 }
 
@@ -263,11 +264,12 @@ void index(int argc, char **argv){
     a->model = fasttext::model_name::sup;
     a->loss = fasttext::loss_name::hs;
     a->input = a->output+".tr";
-    a->epoch = 100;
-    a->lr = 1;
-    a->minCount = 1;
+    // a->epoch = 100;
+    // a->lr = 1;
+    // a->minCount = 1;
+    // a->tries = 5;
     // a->dim = 100;
-    a->wordNgrams = 2;
+    // a->wordNgrams = 2;
     fastText.train(a);
 
     std::cout << "Cleaning temporal files ..." <<std::endl;
