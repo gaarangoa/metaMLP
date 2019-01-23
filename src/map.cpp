@@ -267,7 +267,7 @@ void index(int argc, char **argv){
     a->lr = 1;
     a->minCount = 1;
     // a->dim = 100;
-    a->wordNgrams = 1;
+    a->wordNgrams = 2;
     fastText.train(a);
 
     std::cout << "Cleaning temporal files ..." <<std::endl;
