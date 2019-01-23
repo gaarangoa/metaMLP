@@ -37,7 +37,7 @@ utils.o: src/utils.cc src/utils.h
 fasttext.o: src/fasttext.cc src/*.h
 	$(CXX) $(CXXFLAGS) -c src/fasttext.cc -o src/fasttext.o
 
-ARGfast: $(OBJS) src/map.cpp
+metaMLP: $(OBJS) src/map.cpp
 	$(CXX) $(CXXFLAGS) $(OBJS) $(INCLUDES) src/map.cpp -o bin/metaMLP
 
 clean:
