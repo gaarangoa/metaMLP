@@ -1,14 +1,14 @@
 
 CXX = c++
 CXXFLAGS = -pthread -std=c++14
-OBJS = src/args.o src/dictionary.o src/productquantizer.o src/matrix.o src/qmatrix.o src/vector.o src/model.o src/utils.o src/fasttext.o 
+OBJS = src/args.o src/dictionary.o src/productquantizer.o src/matrix.o src/qmatrix.o src/vector.o src/model.o src/utils.o src/fasttext.o
 INCLUDES = -I./src
 
 opt: CXXFLAGS += -O3 -funroll-loops
-opt: ARGfast
+opt: metaMLP
 
 debug: CXXFLAGS += -g -O0 -fno-inline
-debug: ARGfast
+debug: metaMLP
 
 args.o: src/args.cc src/args.h
 	$(CXX) $(CXXFLAGS) -c src/args.cc -o src/args.o
@@ -38,7 +38,7 @@ fasttext.o: src/fasttext.cc src/*.h
 	$(CXX) $(CXXFLAGS) -c src/fasttext.cc -o src/fasttext.o
 
 ARGfast: $(OBJS) src/map.cpp
-	$(CXX) $(CXXFLAGS) $(OBJS) $(INCLUDES) src/map.cpp -o bin/predX 
+	$(CXX) $(CXXFLAGS) $(OBJS) $(INCLUDES) src/map.cpp -o bin/metaMLP
 
 clean:
-	rm -rf src/*.o bin/predX
+	rm -rf src/*.o bin/metaMLP
