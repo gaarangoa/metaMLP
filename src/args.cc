@@ -45,7 +45,7 @@ Args::Args() {
   mink = 3;
   tries = 1;
   reduced = true;
-  seq=false;
+  seq=true;
   minSeqLen = 100;
 
   qout = false;
