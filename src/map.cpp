@@ -249,7 +249,7 @@ void quant(int argc, char **argv){
     fabn.close();
     fo.close();
 
-    if(!a->seq) remove( report_file.c_str() );
+    // if(!a->seq) remove( report_file.c_str() );
 
     std::cout << "[***********************] "<< entries <<" sequences 100%\n";
     std::cout << ith+1 << " threads used from " << NUM_THREADS << std::endl;
