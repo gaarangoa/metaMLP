@@ -193,22 +193,23 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         {
             pre_buffer = KMER;
 
-            for (int ki = 0; ki < l - args->kmer; ki++)
+            for (int ki = 0; ki < l - args->kmer; ki += args->kmer)
             {
                 // rx = uni(rng);
                 rx = ki;
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training.
-                variable_kmer = random_mer_size(rng);
-                pkmer = toCSkmer.substr(rx, variable_kmer);
+                // variable_kmer = random_mer_size(rng);
+                pkmer = toCSkmer.substr(rx, args->kmer);
+                // std::cout << variable_kmer << std::endl;
                 // pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer += ' ' + pkmer;
-                if (manykmers < args->mink)
-                {
-                    if (master_signature_hash_full.count(pkmer) > 0)
-                    {
-                        manykmers++;
-                    }
-                }
+                // if (manykmers < args->mink)
+                // {
+                //     if (master_signature_hash_full.count(pkmer) > 0)
+                //     {
+                //         manykmers++;
+                //     }
+                // }
                 pkmer.clear();
             }
 
