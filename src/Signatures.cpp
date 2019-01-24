@@ -143,7 +143,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             frame++;
         }
 
-        std::uniform_int_distribution<int> uni(0, length(*it) - seed_size - 2);
+        std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 2);
         rx = uni(rng); // random position
         // Move iterator to a string-like structure
 
