@@ -127,9 +127,21 @@ void quant(int argc, char **argv){
     struct stat st;
     stat(a->input.c_str(), &st);
 
-    seqan::readRecord(id, seq, seqFileIn);
-    int all_reads = int( st.st_size/( length(id)+length(seq) ) );
+    int stat_size_10_records=1;
+
+    for( int i=0; i < 10; i++ ){
+        seqan::readRecord(id, seq, seqFileIn);
+        stat_size_10_records = stat_size_10_records + length(id)+length(seq);
+    }
+
+    int all_reads = int( (st.st_size*10)/stat_size_10_records );
     int chunks = int(all_reads/NUM_THREADS);
+
+    std::cout << "file size: " << st.st_size <<std::endl;
+    std::cout << "number characters per 10 records: " << stat_size_10_records << std::endl;
+    std::cout << "estimated number of reads: " << all_reads << std::endl;
+
+
 
     std::string progress = "*";
     // std::vector < std::unordered_map < std::string, std::tuple < std::string, float > > > Predictions(NUM_THREADS);
