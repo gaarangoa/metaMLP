@@ -27,7 +27,7 @@ void printPredictUsage() {
     << "  -kmer         k-mer size [default 11 - same kmer used in predX index]\n"
     << "  -seed         seed size [default 11 - amino acids]\n"
     << "  -mink         minimum number of kmers that each read has to contain [default 3]\n"
-    << "  -seq          Report sequence classifications [-seq 1 to report sequences]\n"
+    // << "  -seq          Report sequence classifications [-seq 1 to report sequences]\n"
     << "  -NoReduced    Enable it if index is built with the -NoReduced option\n"
     << "  -tries        how many times tries to find a random seed [default 1] increse it to find more hits\n"
     << "  -minSeqLen    minimum sequence length of the sequences. It has to be greater than -kmer [default 100]\n"
@@ -222,9 +222,9 @@ void quant(int argc, char **argv){
     for (int i=0; i<=ith; i++){
         for(const auto& arglabel: td[i].FuncPred){
             // report sequences (not to compute the absolute abundance)
-            if(a->seq){
-                fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
-            }
+            // if(a->seq){
+            fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
+            // }
 
             if(std::get<1>(arglabel.second)>0.5){
                 sep = fasttext::utils::splitString(std::get<0>(arglabel.second),'\t');
@@ -251,10 +251,10 @@ void quant(int argc, char **argv){
 
     if(!a->seq) remove( report_file.c_str() );
 
-    std::cout << "[***********************] "<< entries <<" reads 100%\n";
+    std::cout << "[***********************] "<< entries <<" sequences 100%\n";
     std::cout << ith+1 << " threads used from " << NUM_THREADS << std::endl;
     std::cout << entries << " processed reads " << std::endl;
-    std::cout << arglike << " ARG-like reads " << std::endl;
+    std::cout << arglike << " Annotated reads " << std::endl;
 
     exit(0);
 }
