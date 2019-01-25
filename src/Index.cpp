@@ -142,38 +142,45 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         }
 
         prelabel = split(seqan::toCString(id), '|')[label_index];
-        label = "__label__" + prelabel;
+        label = "__label__" + prelabel + "__";
 
         // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training.
 
         Sl = rProt.length(); // length of the protein sequence
         proteins++;
 
+        fo << label << '\t';
+
         int min_kmers = int(Sl / k) - 1;
 
         // This parameter controls the number of kmers per strin of kmers (for instance 5 consecutive kmers not at 1nt resolution)
-        // By default it is using minimum number of 5 kmers per sentence k1 k2 k3 k4 k5 __label__
-        // to add functionality for genes prediction for instance, it would be necessary to add
-        // more kmers, like 20 or more, but because this version is designed for short reads 5*33 ~ 150nt is fine
+        // By default it is using 4
 
-        if (min_kmers > 5)
+        if (min_kmers > 4)
         {
-            min_kmers = 5;
+            min_kmers = 4;
         }
 
-        int kmers_in_read = 0;
         int count_kmers = 0;
-
         for (int ix = 0; ix < k; ix++)
         {
+            if (ix > 0)
+            {
+                // To start each new slidding window in a new line.
+                fo << std::endl;
+                fo << label << '\t';
+                count_kmers = 0;
+            }
+
             for (int i = ix; i <= Sl - k; i += k)
             {
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
 
-                if (count_kmers == min_kmers)
+                if (count_kmers % min_kmers == 0 && count_kmers > 0)
                 {
-                    fo << ks + '\t' << label << std::endl;
+                    fo << ks + ' ' << std::endl;
+                    fo << label << '\t';
                     count_kmers = 0;
                 }
                 else
@@ -182,13 +189,6 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
                     count_kmers++;
                 }
             }
-
-            if (count_kmers > 0)
-            {
-                fo << "\t" << label << '\n';
-            }
-
-            count_kmers = 0;
         }
 
         fo << std::endl;
