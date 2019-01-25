@@ -147,32 +147,48 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training.
 
         Sl = rProt.length(); // length of the protein sequence
+        // for(int i=0; i<Sl-l; i+=3){
+
+        //     for (int ri=0; ri<10; ri++){
+        //         std::uniform_int_distribution<int> uni(i, i+l-k);
+        //         rip = uni(rng);
+        //         ks = rProt.substr(rip, k);
+        //         kmers[ks][prelabel]=true;
+        //         read += ' '+ks;
+        //     }
+
+        //     // fo << label << "\t" << prelabel+' ' << read << std::endl;
+        //     // fo << label << "\t" << read << std::endl;
+        //     read.clear();
+
+        // }
+
+        // read.clear();
+        // fragments = 0;
         proteins++;
+
+        // for computing the skipgram I follow a different approach, first  I don't need to split the sequence into reads, and just take the kmers and store them into a file that will be used for the training of the skipgram.
+
+        // TODO replace this if you want to put in index the label information
+        // fo << label << "\t" << prelabel+' ';
 
         fo << label << '\t';
 
-        int min_kmers = int(Sl / k) - 1;
+        int min_kmers = int(Sl / k);
 
-        // This parameter controls the number of kmers per strin of kmers (for instance 5 consecutive kmers not at 1nt resolution)
-        // By default it is using 4
-
-        if (min_kmers > 4)
+        if (min_kmers > 5)
         {
-            min_kmers = 4;
+            min_kmers = 5;
         }
 
-        int count_kmers = 0;
+        // std::cout << "sequence_length: " << Sl << std::endl;
+        // std::cout << "k: " << k << std::endl;
+        // std::cout << "makx kmers: " << min_kmers << std::endl;
+
         for (int ix = 0; ix < k; ix++)
         {
-            if (ix > 0)
-            {
-                // To start each new slidding window in a new line.
-                fo << std::endl;
-                fo << label << '\t';
-                count_kmers = 0;
-            }
-
-            for (int i = ix; i <= Sl - k; i += k)
+            int count_kmers = 0;
+            for (int i = ix; i <= Sl - k - 1; i += k)
             {
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
@@ -192,9 +208,11 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         }
 
         fo << std::endl;
+        // fos << std::endl;
     }
 
     fo.close();
+    // fos.close();
 
     // Store kmers to a text file
     // hash_index_table HASH_INDEX[kmers.size()];
