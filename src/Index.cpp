@@ -195,7 +195,6 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
     }
 
     fo.close();
-    // fos.close();
 
     // Store kmers to a text file
     // hash_index_table HASH_INDEX[kmers.size()];
