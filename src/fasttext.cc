@@ -842,7 +842,7 @@ void FastText::train(std::shared_ptr<Args> args)
     }
     model_ = std::make_shared<Model>(input_, output_, args_, 0);
 
-    std::cout << 'Saving Model ...' << std::endl;
+    std::cout << "Saving Model ..." << std::endl;
     saveModel();
     if (args_->model != model_name::sup)
     {
