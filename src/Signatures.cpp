@@ -124,6 +124,10 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     std::string pkmer;
     std::string pseed;
 
+    // possible kmer sizes
+    std::uniform_int_distribution<int> random_mer_size(3, args->kmer);
+    int variable_kmer = random_mer_size(rng);
+
     int l = 0;
     int ishash = 0;
     // mtx.lock();
@@ -168,6 +172,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         while (1)
         {
             rx = uni(rng);
+
             KMER = toCSkmer.substr(rx, args->kmer);
             ishash = master_signature_hash_full.count(KMER);
             if (ishash > 0)
@@ -188,46 +193,48 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         {
             pre_buffer = KMER;
 
-            for (int ki = 0; ki < l - args->kmer; ki++)
+            for (int ki = 0; ki < l - args->kmer; ki += args->kmer)
             {
                 // rx = uni(rng);
                 rx = ki;
                 // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training.
+                // variable_kmer = random_mer_size(rng);
                 pkmer = toCSkmer.substr(rx, args->kmer);
+                // std::cout << variable_kmer << std::endl;
                 // pseed = toCSkmer.substr(rx, args->seed);
                 pre_buffer += ' ' + pkmer;
-                if (manykmers < args->mink)
-                {
-                    if (master_signature_hash_full.count(pkmer) > 0)
-                    {
-                        manykmers++;
-                    }
-                }
+                // if (manykmers < args->mink)
+                // {
+                //     if (master_signature_hash_full.count(pkmer) > 0)
+                //     {
+                //         manykmers++;
+                //     }
+                // }
                 pkmer.clear();
             }
 
-            if (manykmers >= args->mink)
+            // if (manykmers >= args->mink)
+            // {
+
+            // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
+
+            if (length(ids[total_reads]) > 1)
             {
+                // Check if the read has a proper header
+                buffer += pre_buffer + '\n';
+                pre_buffer.clear();
 
-                // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
-
-                if (length(ids[total_reads]) > 1)
+                readLabels.push_back(seqan::toCString(ids[total_reads]));
+                std::stringstream iseq;
+                iseq << seqs[total_reads];
+                if (args->seq)
                 {
-                    // Check if the read has a proper header
-                    buffer += pre_buffer + '\n';
-                    pre_buffer.clear();
-
-                    readLabels.push_back(seqan::toCString(ids[total_reads]));
-                    std::stringstream iseq;
-                    iseq << seqs[total_reads];
-                    if (args->seq)
-                    {
-                        readSeqs.push_back(iseq.str());
-                    }
-
-                    num_reads++;
+                    readSeqs.push_back(iseq.str());
                 }
+
+                num_reads++;
             }
+            // }
         }
 
         // seqan::clear(aaSeqs[iframe]);

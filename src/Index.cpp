@@ -1,29 +1,28 @@
 #include "Index.h"
 // RAPsearch index
 std::unordered_map<char, char> reducedIndexTable = {
-                                                        {'A','A'},
-                                                        {'C','C'},
-                                                        {'D','E'},
-                                                        {'E','E'},
-                                                        {'F','F'},
-                                                        {'G','G'},
-                                                        {'H','H'},
-                                                        {'I','I'},
-                                                        {'K','K'},
-                                                        {'L','I'},
-                                                        {'M','I'},
-                                                        {'N','E'},
-                                                        {'P','P'},
-                                                        {'Q','E'},
-                                                        {'R','K'},
-                                                        {'S','S'},
-                                                        {'T','S'},
-                                                        {'V','I'},
-                                                        {'W','F'},
-                                                        {'X','X'},
-                                                        {'Y','F'},
-                                                        {'Z','X'}
-                                                    };
+    {'A', 'A'},
+    {'C', 'C'},
+    {'D', 'E'},
+    {'E', 'E'},
+    {'F', 'F'},
+    {'G', 'G'},
+    {'H', 'H'},
+    {'I', 'I'},
+    {'K', 'K'},
+    {'L', 'I'},
+    {'M', 'I'},
+    {'N', 'E'},
+    {'P', 'P'},
+    {'Q', 'E'},
+    {'R', 'K'},
+    {'S', 'S'},
+    {'T', 'S'},
+    {'V', 'I'},
+    {'W', 'F'},
+    {'X', 'X'},
+    {'Y', 'F'},
+    {'Z', 'X'}};
 
 // DIAMOND index
 // std::unordered_map<char, char> reducedIndexTable = {
@@ -51,139 +50,148 @@ std::unordered_map<char, char> reducedIndexTable = {
 //                                                         {'Z','X'}
 //                                                     };
 
-
-Index::Index(){
-    
+Index::Index()
+{
 }
 
-template<typename Out>
-void split(const std::string &s, char delim, Out result) {
+template <typename Out>
+void split(const std::string &s, char delim, Out result)
+{
     std::stringstream ss;
     ss.str(s);
     std::string item;
-    while (std::getline(ss, item, delim)) {
+    while (std::getline(ss, item, delim))
+    {
         *(result++) = item;
     }
 }
 
-std::vector<std::string> split(const std::string &s, char delim) {
+std::vector<std::string> split(const std::string &s, char delim)
+{
     std::vector<std::string> elems;
     split(s, delim, std::back_inserter(elems));
     return elems;
 }
 
-std::string Index::AA2Reduced(std::string aa){
+std::string Index::AA2Reduced(std::string aa)
+{
     std::string aaR;
-    for(const char& i: aa){
-        aaR+=reducedIndexTable[i];
+    for (const char &i : aa)
+    {
+        aaR += reducedIndexTable[i];
     }
     return aaR;
 }
 
-void Index::training(std::string output){
-    fasttext::FastText fasttext; 
+void Index::training(std::string output)
+{
+    fasttext::FastText fasttext;
 }
-
 
 // typedef struct {
 //     std::string key;
 //     std::string value;
 // } hash_index_table;
 
+void Index::indexing(std::string finput, std::string output, int kmer, int label_index, bool isreduced)
+{
 
-void Index::indexing(std::string finput, std::string output, int kmer, int label_index, bool isreduced){
-    
-    std::unordered_map< std::string,std::unordered_map< std::string, bool > > kmers;
+    std::unordered_map<std::string, std::unordered_map<std::string, bool>> kmers;
 
     seqan::CharString id;
     seqan::CharString seq;
     std::ifstream input(finput);
-    
+
     std::string label, prelabel;
     std::string rProt; // protein with the reduced alphabet
     std::string kml;
     std::string fragment;
 
-    int fragments=0;
+    int fragments = 0;
 
-    std::ofstream fo(output+".tr");
+    std::ofstream fo(output + ".tr");
     // std::ofstream fos(output+".tri");
     std::string ks;
-    int proteins=0;
+    int proteins = 0;
     seqan::SeqFileIn seqFileIn(seqan::toCString(finput));
     std::cout << "Processing input file ... " << std::endl;
 
-
-    std::random_device rd;   
+    std::random_device rd;
     std::mt19937 rng(rd());
     int Sl;
-    int rip; // random position
-    int l = 33; // read length
+    int rip;      // random position
+    int l = 33;   // read length
     int k = kmer; // kmer size
     std::string read;
-    
-    while (!atEnd(seqFileIn)){
-        std::cout << proteins << " processed reads" <<"\r";
+
+    while (!atEnd(seqFileIn))
+    {
+        std::cout << proteins << " processed reads"
+                  << "\r";
         std::cout.flush();
 
         seqan::readRecord(id, seq, seqFileIn);
-        
-        if(isreduced){
-            rProt =  AA2Reduced(seqan::toCString(seq));
-        }else{
-            rProt = seqan::toCString(seq);}
-        
+
+        if (isreduced)
+        {
+            rProt = AA2Reduced(seqan::toCString(seq));
+        }
+        else
+        {
+            rProt = seqan::toCString(seq);
+        }
+
         prelabel = split(seqan::toCString(id), '|')[label_index];
-        label = "__label__"+prelabel+"__";
-        
-        // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training. 
+        label = "__label__" + prelabel;
+
+        // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training.
 
         Sl = rProt.length(); // length of the protein sequence
-        // for(int i=0; i<Sl-l; i+=3){
-
-        //     for (int ri=0; ri<10; ri++){
-        //         std::uniform_int_distribution<int> uni(i, i+l-k);
-        //         rip = uni(rng);
-        //         ks = rProt.substr(rip, k);
-        //         kmers[ks][prelabel]=true;
-        //         read += ' '+ks;
-        //     }
-
-        //     // fo << label << "\t" << prelabel+' ' << read << std::endl;
-        //     // fo << label << "\t" << read << std::endl;
-        //     read.clear();
-
-        // }
-
-        // read.clear();
-        // fragments = 0;
         proteins++;
 
-        // for computing the skipgram I follow a different approach, first  I don't need to split the sequence into reads, and just take the kmers and store them into a file that will be used for the training of the skipgram. 
-        
-        // TODO replace this if you want to put in index the label information
-        // fo << label << "\t" << prelabel+' ';
+        int min_kmers = int(Sl / k) - 1;
 
-        fo << label << '\t';
+        // This parameter controls the number of kmers per strin of kmers (for instance 5 consecutive kmers not at 1nt resolution)
+        // By default it is using minimum number of 5 kmers per sentence k1 k2 k3 k4 k5 __label__
+        // to add functionality for genes prediction for instance, it would be necessary to add
+        // more kmers, like 20 or more, but because this version is designed for short reads 5*33 ~ 150nt is fine
 
-        for (int i=0; i<=Sl-k; i++){
-            ks = rProt.substr(i, k);
-            kmers[ks][prelabel]=true;
-            // fos << ks+' ';
-            if(i % 20 == 0 && i>0){
-                
-                fo << ks+' ' << std::endl;
-                fo << label << '\t';
-                // TODO: here add it if you want to put the labels information
-                // fo << label << "\t" << prelabel+' ';
-            }else{
-                fo << ks+' ';
+        if (min_kmers > 3)
+        {
+            min_kmers = 3;
+        }
+
+        int kmers_in_read = 0;
+        int count_kmers = 0;
+
+        for (int ix = 0; ix < k; ix++)
+        {
+            for (int i = ix; i <= Sl - k; i += k)
+            {
+                ks = rProt.substr(i, k);
+                kmers[ks][prelabel] = true;
+
+                if (count_kmers == min_kmers)
+                {
+                    fo << ks + '\t' << label << std::endl;
+                    count_kmers = 0;
+                }
+                else
+                {
+                    fo << ks + ' ';
+                    count_kmers++;
+                }
             }
+
+            if (count_kmers > 0)
+            {
+                fo << "\t" << label << '\n';
+            }
+
+            count_kmers = 0;
         }
 
         fo << std::endl;
-        // fos << std::endl;
-        
     }
 
     fo.close();
@@ -192,13 +200,15 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
     // Store kmers to a text file
     // hash_index_table HASH_INDEX[kmers.size()];
 
-    std::ofstream fo2(output+".kh");
-    int ckmers=0;
-    for(const auto& arglabel: kmers){
+    std::ofstream fo2(output + ".kh");
+    int ckmers = 0;
+    for (const auto &arglabel : kmers)
+    {
 
         fo2 << arglabel.first + "\t";
-        for(const auto& lbl: arglabel.second){
-            fo2 << lbl.first << " " ;
+        for (const auto &lbl : arglabel.second)
+        {
+            fo2 << lbl.first << " ";
         }
         fo2 << std::endl;
 
@@ -211,7 +221,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
     std::cout << proteins << " proteins in the database " << std::endl;
     std::cout << ckmers << " unique " << kmer << "-mers " << std::endl;
     fo2.close();
-    
+
     // int length_hash_index = sizeof(HASH_INDEX)/sizeof(hash_index_table);
     // hsize_t dim[1];
     // dim[0] = sizeof(HASH_INDEX)/sizeof(hash_index_table);
@@ -219,7 +229,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
     // // defining data to pass to HDF5
     // H5::CompType mtype(sizeof(hash_index_table));
-    
+
     // mtype.insertMember("key", HOFFSET(hash_index_table, key), H5::StrType());
     // mtype.insertMember("value", HOFFSET(hash_index_table, value), H5::StrType());
 
@@ -230,7 +240,4 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
     // delete dataset;
     // delete file;
-
-
-
 }
