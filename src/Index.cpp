@@ -174,25 +174,36 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
         fo << label << '\t';
 
+        int min_kmers = int(Sl / k) - 1;
+
+        if (min_kmers > 5)
+        {
+            min_kmers = 5;
+        }
+
+        // std::cout << "sequence_length: " << Sl << std::endl;
+        // std::cout << "k: " << k << std::endl;
+        // std::cout << "makx kmers: " << min_kmers << std::endl;
+
+        int count_kmers = 0;
+
         for (int ix = 0; ix < k; ix++)
         {
-            for (int i = ix; i <= Sl - k - 1; i += k)
+            for (int i = ix; i <= Sl - k; i += k)
             {
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
 
-                // fos << ks+' ';
-                if (i % 20 == 0 && i > 0)
+                if (count_kmers % min_kmers == 0 && count_kmers > 0)
                 {
-
                     fo << ks + ' ' << std::endl;
                     fo << label << '\t';
-                    // TODO: here add it if you want to put the labels information
-                    // fo << label << "\t" << prelabel+' ';
+                    count_kmers = 0;
                 }
                 else
                 {
                     fo << ks + ' ';
+                    count_kmers++;
                 }
             }
         }
