@@ -142,7 +142,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         }
 
         prelabel = split(seqan::toCString(id), '|')[label_index];
-        label = "__label__" + prelabel;
+        label = "__label__" + prelabel + '__';
 
         // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training.
 
