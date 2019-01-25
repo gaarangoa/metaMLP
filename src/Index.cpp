@@ -176,7 +176,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
         for (int ix = 0; ix < k; ix++)
         {
-            for (int i = ix; i <= Sl - k - 1; i += k)
+            for (int i = ix; i < Sl - k - 1; i += k)
             {
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
@@ -187,8 +187,6 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
                     fo << ks + ' ' << std::endl;
                     fo << label << '\t';
-                    // TODO: here add it if you want to put the labels information
-                    // fo << label << "\t" << prelabel+' ';
                 }
                 else
                 {
