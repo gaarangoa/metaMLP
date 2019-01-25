@@ -156,9 +156,9 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // to add functionality for genes prediction for instance, it would be necessary to add
         // more kmers, like 20 or more, but because this version is designed for short reads 5*33 ~ 150nt is fine
 
-        if (min_kmers > 8)
+        if (min_kmers > 3)
         {
-            min_kmers = 8;
+            min_kmers = 3;
         }
 
         int kmers_in_read = 0;
