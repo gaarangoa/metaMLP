@@ -142,7 +142,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         }
 
         prelabel = split(seqan::toCString(id), '|')[label_index];
-        label = "__label__" + prelabel + '__';
+        label = "__label__" + prelabel + "__";
 
         // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training.
 
@@ -156,9 +156,9 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // to add functionality for genes prediction for instance, it would be necessary to add
         // more kmers, like 20 or more, but because this version is designed for short reads 5*33 ~ 150nt is fine
 
-        if (min_kmers > 10)
+        if (min_kmers > 5)
         {
-            min_kmers = 10;
+            min_kmers = 5;
         }
 
         int kmers_in_read = 0;
