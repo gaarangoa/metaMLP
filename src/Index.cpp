@@ -186,7 +186,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // std::cout << "makx kmers: " << min_kmers << std::endl;
 
         int count_kmers = 0;
-        std::uniform_int_distribution<int> uni(5, 10);
+        std::uniform_int_distribution<int> uni(4, 6);
 
         for (int ix = 0; ix < k; ix++)
         {
