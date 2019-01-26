@@ -186,9 +186,11 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // std::cout << "makx kmers: " << min_kmers << std::endl;
 
         int count_kmers = 0;
+        std::uniform_int_distribution<int> uni(5, 10);
 
         for (int ix = 0; ix < k; ix++)
         {
+            min_kmers = uni(rng);
 
             for (int i = ix; i <= Sl - k - 1; i += k)
             {
