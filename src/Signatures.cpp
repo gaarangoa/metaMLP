@@ -193,7 +193,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         {
             pre_buffer = KMER;
 
-            for (int ki = 0; ki < l - args->kmer; ki += args->kmer)
+            for (int ki = 0; ki < l - args->kmer; ki++)
             {
                 // rx = uni(rng);
                 rx = ki;
