@@ -187,7 +187,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
         int count_kmers = 0;
         std::uniform_int_distribution<int> uni(3, 5);
-        std::uniform_int_distribution<int> ksize(7, k);
+        // std::uniform_int_distribution<int> ksize(7, k);
 
         for (int ix = 0; ix < k; ix++)
         {
@@ -195,10 +195,10 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
             for (int i = ix; i <= Sl - k - 1; i += k)
             {
-                int ksizei = ksize(rng);
+                // int ksizei = ksize(rng);
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
-                ks = rProt.substr(i, ksizei);
+                // ks = rProt.substr(i, ksizei);
 
                 if (count_kmers % min_kmers == 0 && count_kmers > 0)
                 {
