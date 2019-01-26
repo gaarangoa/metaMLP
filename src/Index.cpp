@@ -208,10 +208,10 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
                 }
             }
 
-            if (count_kmers > 0)
-            {
-                fo << "\t" << label << '\n';
-            }
+            // if (count_kmers > 0)
+            // {
+            //     fo << "\t" << label << '\n';
+            // }
 
             count_kmers = 0;
         }
