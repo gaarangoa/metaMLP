@@ -172,7 +172,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // TODO replace this if you want to put in index the label information
         // fo << label << "\t" << prelabel+' ';
 
-        fo << label << '\t';
+        // fo << label << '\t';
 
         int min_kmers = int(Sl / k);
 
@@ -185,9 +185,11 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         // std::cout << "k: " << k << std::endl;
         // std::cout << "makx kmers: " << min_kmers << std::endl;
 
+        int count_kmers = 0;
+
         for (int ix = 0; ix < k; ix++)
         {
-            int count_kmers = 0;
+
             for (int i = ix; i <= Sl - k - 1; i += k)
             {
                 ks = rProt.substr(i, k);
@@ -195,8 +197,8 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
                 if (count_kmers % min_kmers == 0 && count_kmers > 0)
                 {
-                    fo << ks + ' ' << std::endl;
-                    fo << label << '\t';
+                    fo << ks + ' ' << label << std::endl;
+                    // fo << label << '\t';
                     count_kmers = 0;
                 }
                 else
@@ -205,9 +207,16 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
                     count_kmers++;
                 }
             }
+
+            if (count_kmers > 0)
+            {
+                fo << "\t" << label << '\n';
+            }
+
+            count_kmers = 0;
         }
 
-        fo << std::endl;
+        // fo << std::endl;
         // fos << std::endl;
     }
 
