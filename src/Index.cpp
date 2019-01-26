@@ -166,7 +166,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
         for (int ix = 0; ix < k; ix++)
         {
-            for (int i = ix; i <= Sl - k; i += k)
+            for (int i = ix; i <= Sl - k; i++)
             {
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
