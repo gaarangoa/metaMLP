@@ -191,7 +191,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
             count_kmers = 0;
         }
 
-        fo << std::endl;
+        // fo << std::endl;
     }
 
     fo.close();
