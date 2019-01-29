@@ -63,6 +63,8 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a)
         master_signature_hash_full[iline[0]] = true; //iline[1];
     }
     ifs.close();
+
+    std::cout << "Signatures Loaded \n";
 }
 
 void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::StringSet<seqan::CharString> &ids, std::vector<std::string> &readLabels, std::string &buffer, std::unordered_map<std::string, std::tuple<std::string, float>> &FuncPred)
@@ -79,6 +81,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     /////////////////////////////////////////////////////
     /*.............GET READING FRAMES.........*/
     /////////////////////////////////////////////////////
+
+    std::cout << "Open Reading Frames" << std::endl;
     seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> aaSeqs;
     if (isreduced)
     {
@@ -98,7 +102,6 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     //////////////////////////////////////////////////////////////////////////////
     std::random_device rd;
     std::mt19937 rng(rd());
-    // std::uniform_int_distribution<int> uni(0, int(read_length/3)-seed_size-1);
     int frame = 1, rx;
     typedef seqan::Infix<seqan::String<seqan::AminoAcid>>::Type kmer;
 
@@ -120,6 +123,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     int ishash = 0;
     // mtx.lock();
     int iframe = 0;
+    std::cout << "Traverse Reads file" << std::endl;
     for (AIter it = begin(aaSeqs); it != end(aaSeqs); ++it)
     {
 
@@ -188,10 +192,8 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 readLabels.push_back(seqan::toCString(ids[total_reads]));
                 std::stringstream iseq;
                 iseq << seqs[total_reads];
-                if (args->seq)
-                {
-                    readSeqs.push_back(iseq.str());
-                }
+
+                readSeqs.push_back(iseq.str());
 
                 num_reads++;
             }
@@ -206,7 +208,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
     std::stringstream trex(buffer);
     buffer.clear();
-    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
+    // fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
 
     trex.str(std::string());
     readLabels.clear();
