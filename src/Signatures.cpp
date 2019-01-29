@@ -197,7 +197,6 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             }
         }
 
-        // seqan::clear(aaSeqs[iframe]);
         iframe++;
     }
 
