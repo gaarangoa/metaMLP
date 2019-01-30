@@ -185,6 +185,8 @@ void quant(int argc, char **argv)
     // REDUCE SECTION
     // ********************************************************************************************************
 
+    std::cout << " Computing Relative Abundances " << std::endl;
+
     for (int i = 0; i < NUM_THREADS; i++)
     {
         for (const auto &arglabel : td[i].FuncPred)
