@@ -9,7 +9,6 @@ Performance of MetaMLP is comparable to diamond blastx with an identity cutoff o
         cd ARGfast
         make clean && make
 
-
 ### Usage
 #### metaMLP
         usage: predX <command> <args>
