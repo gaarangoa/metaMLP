@@ -183,7 +183,10 @@ void quant(int argc, char **argv)
     // REDUCE SECTION
     // ********************************************************************************************************
 
-    std::cout << " Computing Relative Abundances " << std::endl;
+    std::cout << entries << " Processed sequences " << std::endl;
+    std::cout << arglike << " Annotated sequences " << std::endl;
+
+    std::cout << "Computing Relative Abundances" << std::endl;
 
     for (int i = 0; i < NUM_THREADS; i++)
     {
@@ -199,9 +202,8 @@ void quant(int argc, char **argv)
                 fo << arglabel.first << "\t" << label_sequence[0] << "\t" << std::get<1>(arglabel.second) << "\n";
 
                 absolute_abundance[label_sequence[0]] += 1;
+                arglike++;
             }
-
-            arglike++;
         }
     }
 
@@ -218,9 +220,6 @@ void quant(int argc, char **argv)
 
     fabn.close();
     fo.close();
-
-    std::cout << entries << " processed sequences " << std::endl;
-    std::cout << arglike << " Annotated sequences " << std::endl;
 
     exit(0);
 }
