@@ -105,7 +105,7 @@ void Args::parseArgs(int argc, char **argv)
         }
         else if (strcmp(argv[ai], "-minProbability") == 0)
         {
-            minProbability = atoi(argv[ai + 1]);
+            minProbability = stof(argv[ai + 1]);
         }
         else if (strcmp(argv[ai], "-seed") == 0)
         {
