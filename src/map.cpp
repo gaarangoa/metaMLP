@@ -87,8 +87,7 @@ void thread_process(void *args)
 {
     struct thread_data *params;
     params = (struct thread_data *)args;
-
-    // (*params->signatures).predict(params->seqs, params->ids, params->readLabels, params->buffer, params->FuncPred);
+    (*params->signatures).predict(params->seqs, params->ids, params->readLabels, params->buffer, params->FuncPred);
 }
 
 void compute_absolute_abundance()
@@ -154,7 +153,6 @@ void quant(int argc, char **argv)
 
     while (!atEnd(seqFileIn))
     {
-
         for (int thread_number = 0; thread_number < NUM_THREADS; thread_number++)
         {
             seqan::readRecords(ids, seqs, seqFileIn, chunks);
