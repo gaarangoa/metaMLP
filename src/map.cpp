@@ -72,11 +72,10 @@ void thread_process(void *args)
     params = (struct thread_data *)args;
 
     (*params->signatures).predict(params->seqs, params->ids, params->readLabels, params->buffer, params->FuncPred);
+}
 
-    seqan::clear(params->seqs);
-    seqan::clear(params->ids);
-    params->readLabels.clear();
-    params->buffer.clear();
+void compute_absolute_abundance()
+{
 }
 
 void quant(int argc, char **argv)
@@ -96,8 +95,6 @@ void quant(int argc, char **argv)
     std::string report_file = a->output;
 
     int NUM_THREADS = a->thread;
-    if (a->thread == 1)
-        NUM_THREADS = 2;
 
     std::thread threads[NUM_THREADS];
     struct thread_data td[NUM_THREADS];
@@ -123,134 +120,88 @@ void quant(int argc, char **argv)
     int iseq = 0;
     int entries = 0;
 
-    int thread_number = 0;
     // ********************************************************************************************************
     // MAP SECTION
     // ********************************************************************************************************
 
     // read chunks of 10 reads at the time
-    int chunks = 10;
+    int chunks = a->minReadChunkSize;
+    tsl::hopscotch_map<std::string, int> absolute_abundance;
+    std::vector<std::string> label_sequence;
+    int arglike = 0;
 
-    std::cout << "Parsing Input File" << std::endl;
+    std::ofstream fo(report_file);
+    std::ofstream fabn(report_file + ".abn");
+
+    std::cout << "Processing Input File" << std::endl;
 
     while (!atEnd(seqFileIn))
     {
-        seqan::readRecords(ids, seqs, seqFileIn, chunks);
 
-        if (length(seq) < a->minSeqLen)
-            continue;
+        for (int thread_number = 0; thread_number < NUM_THREADS; thread_number++)
+        {
+            seqan::readRecords(ids, seqs, seqFileIn, chunks);
+            entries += length(ids);
+            // move data to thread and clear
+            seqan::move(td[thread_number].seqs, seqs);
+            seqan::move(td[thread_number].ids, ids);
+            td[thread_number].signatures = &signatures;
+            td[thread_number].tid = thread_number;
 
-        // seqan::move(td[ith].seqs, seqs);
-        // seqan::move(td[ith].ids, ids);
-        // td[ith].signatures = &signatures;
-        // td[ith].tid = ith;
+            seqan::clear(seqs);
+            seqan::clear(ids);
 
-        seqan::clear(seqs);
-        seqan::clear(ids);
+            // start a the new thread
+            threads[thread_number] = std::thread(thread_process, &td[thread_number]);
+        }
 
-        std::cout << "Number of elements: " << length(seqs) << std::endl;
+        for (int thread_number = 0; thread_number < NUM_THREADS; thread_number++)
+        {
+            threads[thread_number].join();
+        }
 
-        // seqan::appendValue(seqs, seq);
-        // seqan::appendValue(ids, id);
-
-        //     if (ith == NUM_THREADS - 1)
-        //         continue;
-
-        //     if (iseq == chunks)
-        //     {
-
-        //         seqan::move(td[ith].seqs, seqs);
-        //         seqan::move(td[ith].ids, ids);
-        //         td[ith].signatures = &signatures;
-        //         td[ith].tid = ith;
-
-        //         seqan::clear(seqs);
-        //         seqan::clear(ids);
-
-        //         threads[ith] = std::thread(thread_process, &td[ith]);
-
-        //         iseq = 0;
-        //         ith++;
-        //     }
-        //     else
-        //     {
-        //         iseq++;
-        //     }
+        // display # processed reads
+        std::cout << " processed reads " << entries << "\r" << std::flush;
     }
 
-    // // when the estimated # of reads is greater than the actual number of reads we need to add the last thread.
-    // // std::cout << "["<< progress <<"] "<< entries << " reads " << 100*(ith+1)/NUM_THREADS <<"%\r";
-    // seqan::move(td[ith].seqs, seqs);
-    // seqan::move(td[ith].ids, ids);
-    // td[ith].signatures = &signatures;
-    // // td[ith].report = report_file;
-    // td[ith].tid = ith;
+    // ********************************************************************************************************
+    // REDUCE SECTION
+    // ********************************************************************************************************
 
-    // seqan::clear(seqs);
-    // seqan::clear(ids);
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        for (const auto &arglabel : td[i].FuncPred)
+        {
+            // report individual classification
+            label_sequence = fasttext::utils::splitString(std::get<0>(arglabel.second), '\t');
+            fo << arglabel.first << "\t" << label_sequence[0] << "\t" << std::get<1>(arglabel.second) << "\n";
 
-    // threads[ith] = std::thread(thread_process, &td[ith]);
+            // if a minimum probability of 0.5 report the sequence
+            if (std::get<1>(arglabel.second) > 0.5)
+            {
+                absolute_abundance[label_sequence[0]] += 1;
+            }
 
-    // for (int i = 0; i <= ith; i++)
-    // {
-    //     threads[i].join();
-    // }
+            arglike++;
+        }
+    }
 
-    // // ********************************************************************************************************
-    // // REDUCE SECTION
-    // // ********************************************************************************************************
+    // printout results:
+    std::stringstream ARGc;
+    std::string HMP;
+    for (const auto &item : absolute_abundance)
+    {
+        ARGc << item.first;
+        HMP = ARGc.str();
+        fabn << HMP.replace(HMP.length() - 2, HMP.length(), "").replace(0, 9, "") << "\t" << std::to_string(item.second) << std::endl;
+        ARGc.str(std::string());
+    }
 
-    // // printout results:
+    fabn.close();
+    fo.close();
 
-    // std::ofstream fo(report_file);
-    // std::ofstream fabn(report_file + ".abn");
-
-    // // absolute abundance
-    // tsl::hopscotch_map<std::string, int> absolute_abundance;
-
-    // std::vector<std::string> sep;
-
-    // int arglike = 0;
-    // for (int i = 0; i <= ith; i++)
-    // {
-    //     for (const auto &arglabel : td[i].FuncPred)
-    //     {
-    //         // report sequences (not to compute the absolute abundance)
-    //         // if(a->seq){
-    //         fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
-    //         // }
-
-    //         if (std::get<1>(arglabel.second) > 0.5)
-    //         {
-    //             sep = fasttext::utils::splitString(std::get<0>(arglabel.second), '\t');
-    //             absolute_abundance[sep[0]] += 1;
-    //         }
-
-    //         arglike++;
-    //     }
-    // }
-
-    // // if(!a->seq){=
-    // std::stringstream ARGc;
-    // std::string HMP;
-    // for (const auto &item : absolute_abundance)
-    // {
-    //     ARGc << item.first;
-    //     HMP = ARGc.str();
-    //     fabn << HMP.replace(HMP.length() - 2, HMP.length(), "").replace(0, 9, "") << "\t" << std::to_string(item.second) << std::endl;
-    //     ARGc.str(std::string());
-    // }
-    // // }
-
-    // fabn.close();
-    // fo.close();
-
-    // // if(!a->seq) remove( report_file.c_str() );
-
-    // std::cout << "[***********************] " << entries << " sequences 100%\n";
-    // // std::cout << ith + 1 << " threads used from " << NUM_THREADS << std::endl;
-    // std::cout << entries << " processed sequences " << std::endl;
-    // std::cout << arglike << " Annotated sequences " << std::endl;
+    std::cout << entries << " processed sequences " << std::endl;
+    std::cout << arglike << " Annotated sequences " << std::endl;
 
     exit(0);
 }

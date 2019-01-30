@@ -82,7 +82,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     /*.............GET READING FRAMES.........*/
     /////////////////////////////////////////////////////
 
-    std::cout << "Open Reading Frames" << std::endl;
+    // std::cout << "Open Reading Frames" << std::endl;
     seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> aaSeqs;
     if (isreduced)
     {
@@ -123,7 +123,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     int ishash = 0;
     // mtx.lock();
     int iframe = 0;
-    std::cout << "Traverse Reads file" << std::endl;
+    // std::cout << "Traverse Reads file" << std::endl;
     for (AIter it = begin(aaSeqs); it != end(aaSeqs); ++it)
     {
 
@@ -147,9 +147,9 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         toCSkmer = seqan::toCString(kimer);
 
         // If the read has a stop codon, go to next reading frame:
-        stop_c = toCSkmer.find_first_of('*');
-        if (stop_c < 30)
-            continue;
+        // stop_c = toCSkmer.find_first_of('*');
+        // if (stop_c < 30)
+        //     continue;
 
         l = toCSkmer.length();
 
@@ -160,14 +160,20 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         int tries = 0;
         while (1)
         {
-            rx = uni(rng);
-            KMER = toCSkmer.substr(rx, args->kmer);
-            ishash = master_signature_hash_full.count(KMER);
-            if (ishash > 0)
-                break;
-            if (tries == args->tries)
-                break;
-            tries++;
+            try
+            {
+                rx = uni(rng);
+                KMER = toCSkmer.substr(rx, args->kmer);
+                ishash = master_signature_hash_full.count(KMER);
+                if (ishash > 0)
+                    break;
+                if (tries == args->tries)
+                    break;
+                tries++;
+            }
+            catch (const std::exception e)
+            {
+            }
         }
 
         int manykmers = 0;
@@ -176,7 +182,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         {
             pre_buffer = KMER;
 
-            for (int ki = 0; ki < l - args->kmer; ki += args->kmer)
+            for (int ki = 0; ki < l - args->kmer; ki += 5)
             {
                 pkmer = toCSkmer.substr(ki, args->kmer);
                 pre_buffer += ' ' + pkmer;
@@ -208,7 +214,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
     std::stringstream trex(buffer);
     buffer.clear();
-    // fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
+    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
 
     trex.str(std::string());
     readLabels.clear();

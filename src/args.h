@@ -14,17 +14,32 @@
 #include <ostream>
 #include <string>
 
-namespace fasttext {
+namespace fasttext
+{
 
-enum class model_name : int {cbow=1, sg, sup};
-enum class loss_name : int {hs=1, ns, softmax};
+enum class model_name : int
+{
+    cbow = 1,
+    sg,
+    sup
+};
+enum class loss_name : int
+{
+    hs = 1,
+    ns,
+    softmax
+};
 
-class Args {
+class Args
+{
   public:
     Args();
     std::string input;
     std::string test;
     std::string output;
+    bool reportSequences;
+
+    int minReadChunkSize;
     int kmer;
     int proc;
     int tries;
@@ -65,12 +80,12 @@ class Args {
     size_t cutoff;
     size_t dsub;
 
-    void parseArgs(int, char**);
+    void parseArgs(int, char **);
     void printHelp();
-    void save(std::ostream&);
-    void load(std::istream&);
+    void save(std::ostream &);
+    void load(std::istream &);
 };
 
-}
+} // namespace fasttext
 
 #endif
