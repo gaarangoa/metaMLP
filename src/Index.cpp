@@ -24,32 +24,6 @@ std::unordered_map<char, char> reducedIndexTable = {
     {'Y', 'F'},
     {'Z', 'X'}};
 
-// DIAMOND index
-// std::unordered_map<char, char> reducedIndexTable = {
-//                                                         {'A','A'},
-//                                                         {'C','C'},
-//                                                         {'D','K'},
-//                                                         {'E','K'},
-//                                                         {'F','F'},
-//                                                         {'G','G'},
-//                                                         {'H','H'},
-//                                                         {'I','I'},
-//                                                         {'K','K'},
-//                                                         {'L','I'},
-//                                                         {'M','M'},
-//                                                         {'N','K'},
-//                                                         {'P','P'},
-//                                                         {'Q','K'},
-//                                                         {'R','K'},
-//                                                         {'S','A'},
-//                                                         {'T','A'},
-//                                                         {'V','I'},
-//                                                         {'W','W'},
-//                                                         {'X','X'},
-//                                                         {'Y','Y'},
-//                                                         {'Z','X'}
-//                                                     };
-
 Index::Index()
 {
 }
@@ -144,50 +118,12 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         prelabel = split(seqan::toCString(id), '|')[label_index];
         label = "__label__" + prelabel + "__";
 
-        // TODO: the i+=2 takes each protein and slides the window with two amnoacids. This parameter is set to 2 to avoid to get too many "reads" that are used for training.
-
         Sl = rProt.length(); // length of the protein sequence
-        // for(int i=0; i<Sl-l; i+=3){
-
-        //     for (int ri=0; ri<10; ri++){
-        //         std::uniform_int_distribution<int> uni(i, i+l-k);
-        //         rip = uni(rng);
-        //         ks = rProt.substr(rip, k);
-        //         kmers[ks][prelabel]=true;
-        //         read += ' '+ks;
-        //     }
-
-        //     // fo << label << "\t" << prelabel+' ' << read << std::endl;
-        //     // fo << label << "\t" << read << std::endl;
-        //     read.clear();
-
-        // }
-
-        // read.clear();
-        // fragments = 0;
         proteins++;
 
-        // for computing the skipgram I follow a different approach, first  I don't need to split the sequence into reads, and just take the kmers and store them into a file that will be used for the training of the skipgram.
-
-        // TODO replace this if you want to put in index the label information
-        // fo << label << "\t" << prelabel+' ';
-
-        // fo << label << '\t';
-
         int min_kmers = int(Sl / k);
-
-        if (min_kmers > 5)
-        {
-            min_kmers = 5;
-        }
-
-        // std::cout << "sequence_length: " << Sl << std::endl;
-        // std::cout << "k: " << k << std::endl;
-        // std::cout << "makx kmers: " << min_kmers << std::endl;
-
         int count_kmers = 0;
         std::uniform_int_distribution<int> uni(3, 5);
-        // std::uniform_int_distribution<int> ksize(7, k);
 
         for (int ix = 0; ix < k; ix++)
         {
@@ -195,15 +131,12 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
             for (int i = ix; i <= Sl - k - 1; i += k)
             {
-                // int ksizei = ksize(rng);
                 ks = rProt.substr(i, k);
                 kmers[ks][prelabel] = true;
-                // ks = rProt.substr(i, ksizei);
 
                 if (count_kmers % min_kmers == 0 && count_kmers > 0)
                 {
                     fo << ks + ' ' << label << std::endl;
-                    // fo << label << '\t';
                     count_kmers = 0;
                 }
                 else
@@ -213,23 +146,11 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
                 }
             }
 
-            // if (count_kmers > 0)
-            // {
-            //     fo << "\t" << label << '\n';
-            // }
-
             count_kmers = 0;
         }
-
-        // fo << std::endl;
-        // fos << std::endl;
     }
 
     fo.close();
-    // fos.close();
-
-    // Store kmers to a text file
-    // hash_index_table HASH_INDEX[kmers.size()];
 
     std::ofstream fo2(output + ".kh");
     int ckmers = 0;
@@ -242,33 +163,10 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
             fo2 << lbl.first << " ";
         }
         fo2 << std::endl;
-
-        // HASH_INDEX[ckmers].key = arglabel.first;
-        // HASH_INDEX[ckmers].value = arglabel.first;
-
         ckmers++;
     }
 
     std::cout << proteins << " proteins in the database " << std::endl;
     std::cout << ckmers << " unique " << kmer << "-mers " << std::endl;
     fo2.close();
-
-    // int length_hash_index = sizeof(HASH_INDEX)/sizeof(hash_index_table);
-    // hsize_t dim[1];
-    // dim[0] = sizeof(HASH_INDEX)/sizeof(hash_index_table);
-    // int rank = sizeof(dim)/sizeof(hsize_t);
-
-    // // defining data to pass to HDF5
-    // H5::CompType mtype(sizeof(hash_index_table));
-
-    // mtype.insertMember("key", HOFFSET(hash_index_table, key), H5::StrType());
-    // mtype.insertMember("value", HOFFSET(hash_index_table, value), H5::StrType());
-
-    // // dataspace preparation
-    // H5::DataSpace space(rank, dim);
-    // H5::H5File *file = new H5::H5File(output+".kh.hdf", H5F_ACC_TRUNC);
-    // H5::DataSet *dataset = new H5::DataSet(file->createDataSet("kmer_index", mtype, space));
-
-    // delete dataset;
-    // delete file;
 }
