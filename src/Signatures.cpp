@@ -182,7 +182,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
         {
             pre_buffer = KMER;
 
-            for (int ki = 0; ki < l - args->kmer; ki++)
+            for (int ki = 0; ki < l - args->kmer - 1; ki++)
             {
                 pkmer = toCSkmer.substr(ki, args->kmer);
                 pre_buffer += ' ' + pkmer;
@@ -190,37 +190,35 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             }
 
             // Check if the read has a proper header
-            if (length(ids[total_reads]) > 1)
-            {
-                buffer += pre_buffer + '\n';
-                pre_buffer.clear();
+            // if (length(ids[total_reads]) > 1)
+            // {
+            //     buffer += pre_buffer + '\n';
+            //     pre_buffer.clear();
 
-                readLabels.push_back(seqan::toCString(ids[total_reads]));
-                std::stringstream iseq;
-                iseq << seqs[total_reads];
+            //     readLabels.push_back(seqan::toCString(ids[total_reads]));
+            //     std::stringstream iseq;
+            //     iseq << seqs[total_reads];
 
-                readSeqs.push_back(iseq.str());
+            //     readSeqs.push_back(iseq.str());
 
-                num_reads++;
-            }
+            //     num_reads++;
+            // }
         }
 
         iframe++;
     }
 
-    seqan::clear(seqs);
-    seqan::clear(aaSeqs);
-    seqan::clear(ids);
+    // std::stringstream trex(buffer);
+    // fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
 
-    std::stringstream trex(buffer);
-    buffer.clear();
-    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
-
-    trex.str(std::string());
+    // trex.str(std::string());
     readLabels.clear();
     readSeqs.clear();
+    buffer.clear();
 
     seqan::clear(aaSeqs);
+    seqan::clear(seqs);
+    seqan::clear(ids);
 }
 
 void Signatures::Display(std::string message)
