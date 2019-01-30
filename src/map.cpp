@@ -152,6 +152,8 @@ void quant(int argc, char **argv)
     std::ofstream fo(report_file);
     std::ofstream fabn(report_file + ".abn");
     std::ofstream fasta_o(report_file + ".fasta");
+    if (!a->fastaOutput)
+        remove(report_file.c_str());
 
     std::cout << "Processing Input File" << std::endl;
 
