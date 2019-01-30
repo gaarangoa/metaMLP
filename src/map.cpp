@@ -88,7 +88,7 @@ void thread_process(void *args)
     struct thread_data *params;
     params = (struct thread_data *)args;
 
-    (*params->signatures).predict(params->seqs, params->ids, params->readLabels, params->buffer, params->FuncPred);
+    // (*params->signatures).predict(params->seqs, params->ids, params->readLabels, params->buffer, params->FuncPred);
 }
 
 void compute_absolute_abundance()
