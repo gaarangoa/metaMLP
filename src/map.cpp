@@ -180,7 +180,7 @@ void quant(int argc, char **argv)
         }
 
         // display # processed reads
-        std::cout << " processed reads " << entries << "\r" << std::flush;
+        std::cout << "processed reads " << entries << "\r" << std::flush;
     }
 
     // ********************************************************************************************************
