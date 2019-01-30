@@ -44,7 +44,7 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a)
     /*.............LOADING FASTTEXT MODEL.........*/
     /////////////////////////////////////////////////////
 
-    std::cout << "Loading Fast Text Model ... \n";
+    std::cout << "Loading Model ... \n";
     fasttext.loadModel(file_model + ".bin");
 
     //////////////////////////////////////////////////////
