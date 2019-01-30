@@ -139,7 +139,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
             frame++;
         }
 
-        std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 2);
+        std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 1);
         rx = uni(rng); // random position
         // Move iterator to a string-like structure
 
@@ -189,9 +189,9 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                 pkmer.clear();
             }
 
+            // Check if the read has a proper header
             if (length(ids[total_reads]) > 1)
             {
-                // Check if the read has a proper header
                 buffer += pre_buffer + '\n';
                 pre_buffer.clear();
 

@@ -19,6 +19,7 @@ namespace fasttext
 
 Args::Args()
 {
+    minProbability = 0.8;
     lr = 1;
     dim = 100;
     ws = 5;
@@ -96,6 +97,10 @@ void Args::parseArgs(int argc, char **argv)
         else if (strcmp(argv[ai], "-minReadChunkSize") == 0)
         {
             minReadChunkSize = atoi(argv[ai + 1]);
+        }
+        else if (strcmp(argv[ai], "-minProbability") == 0)
+        {
+            minProbability = atoi(argv[ai + 1]);
         }
         else if (strcmp(argv[ai], "-seed") == 0)
         {
