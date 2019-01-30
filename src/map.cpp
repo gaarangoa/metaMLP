@@ -12,10 +12,10 @@ using namespace std;
 void printUsage()
 {
     std::cerr
-        << "usage: predX <command> <args>\n\n"
-        << "The commands supported by predX are:\n\n"
+        << "usage: metaMLP <command> <args>\n\n"
+        << "The commands supported by metaMLP are:\n\n"
         << "  index              Index the reference sequences\n"
-        << "  quant              Run quantification algorithm [fasttext model]\n"
+        << "  quant              Run quantification algorithm [prediction]\n"
         << std::endl;
 }
 
