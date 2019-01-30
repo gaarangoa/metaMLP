@@ -44,14 +44,13 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a)
     /*.............LOADING FASTTEXT MODEL.........*/
     /////////////////////////////////////////////////////
 
-    std::cout << "Loading Fast Text Model ... \n";
+    std::cout << "Loading Model ... \n";
     fasttext.loadModel(file_model + ".bin");
 
     //////////////////////////////////////////////////////
     /*.............LOADING SIGNATURES TO MEMORY.........*/
     //////////////////////////////////////////////////////
-    // std:cout<< "here the flag \n";
-    // std::cout<< a->tries;
+
     std::cout << "Loading Signatures ... \n";
 
     std::ifstream ifs(fsignatures);
@@ -61,10 +60,11 @@ Signatures::Signatures(std::shared_ptr<fasttext::Args> a)
     while (std::getline(ifs, line))
     {
         iline = splitx(line, '\t');
-        // master_signature_hash[iline[0].substr(0, seed_size)] = true;
-        master_signature_hash_full[iline[0].substr(0, kmer_size)] = true; //iline[1];
+        master_signature_hash_full[iline[0]] = true; //iline[1];
     }
     ifs.close();
+
+    std::cout << "Signatures Loaded \n";
 }
 
 void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::StringSet<seqan::CharString> &ids, std::vector<std::string> &readLabels, std::string &buffer, std::unordered_map<std::string, std::tuple<std::string, float>> &FuncPred)
@@ -72,45 +72,35 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     // TODO: This section has to be updated in the multiprocessing section'
     // Reads up to 10 records
 
-    // fasttext::Vector queryVec(skipgram.args_->dim);
-    // fasttext::Matrix wordVectors(skipgram.dict_->nwords(), skipgram.args_->dim);
-    // skipgram.precomputeWordVectors(wordVectors);
-
     std::vector<std::string> readSeqs;
+    std::vector<std::string> read_labels;
     std::vector<std::string> protSeqs;
-
-    // tsl::hopscotch_map< std::string, bool > signature_hash = master_signature_hash;
-    // tsl::hopscotch_map< std::string, bool > signature_hash_full = master_signature_hash_full;
 
     int num_reads = 1;
     int total_reads = 0;
-    // int read_length = 100;
 
     /////////////////////////////////////////////////////
     /*.............GET READING FRAMES.........*/
     /////////////////////////////////////////////////////
-    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> aaSeqs;
-    if (isreduced)
-    {
-        seqan::GeneticCode<seqan::MURPHY10> GCode; // reduce the aminoacid alphabet to 10
-        seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
-    }
-    else
-    {
-        seqan::GeneticCode<seqan::CANONICAL> GCode;
-        seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
-    }
 
-    // std::cout << aaSeqs[5] << std::endl;
-
-    typedef seqan::Iterator<seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>>>::Type AIter;
+    // std::cout << "Open Reading Frames" << std::endl;
+    // seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> aaSeqs;
+    // if (isreduced)
+    // {
+    //     seqan::GeneticCode<seqan::MURPHY10> GCode; // reduce the aminoacid alphabet to 10
+    //     seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
+    // }
+    // else
+    // {
+    //     seqan::GeneticCode<seqan::CANONICAL> GCode;
+    //     seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
+    // }
 
     //////////////////////////////////////////////////////////////////////////////
     /*.............FILTER READS BY SIGNATURES AND CLASSIFY .........*/
     //////////////////////////////////////////////////////////////////////////////
     std::random_device rd;
     std::mt19937 rng(rd());
-    // std::uniform_int_distribution<int> uni(0, int(read_length/3)-seed_size-1);
     int frame = 1, rx;
     typedef seqan::Infix<seqan::String<seqan::AminoAcid>>::Type kmer;
 
@@ -132,137 +122,95 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     int ishash = 0;
     // mtx.lock();
     int iframe = 0;
-    for (AIter it = begin(aaSeqs); it != end(aaSeqs); ++it)
+    // std::cout << "Traverse Reads file" << std::endl;
+
+    // traverse the nucleotide sequences
+    typedef seqan::Iterator<seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>>>::Type reading_frames_iterator;
+    typedef seqan::Iterator<seqan::StringSet<seqan::DnaString>>::Type TStringSetIterator;
+
+    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
+    seqan::GeneticCode<seqan::MURPHY10> GCode;
+
+    for (unsigned dna_sequence = 0; dna_sequence < length(seqs); dna_sequence++)
     {
+        // get the reading frames for each one
+        seqan::translate(reading_frames_sequences, seqs[dna_sequence], seqan::SIX_FRAME, GCode);
 
-        KMER.clear();
-
-        if (frame == 6)
+        // traverse each reading frame
+        for (reading_frames_iterator it = begin(reading_frames_sequences); it != end(reading_frames_sequences); ++it)
         {
-            frame = 1;
-            total_reads++;
-        }
-        else
-        {
-            frame++;
-        }
+            KMER.clear();
 
-        std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 2);
-        rx = uni(rng); // random position
-        // Move iterator to a string-like structure
+            // transform iterator to a string
+            seqan::move(kimer, *it);
+            toCSkmer = seqan::toCString(kimer);
 
-        seqan::move(kimer, *it);
-        toCSkmer = seqan::toCString(kimer);
+            // length of the orf sequence
+            l = toCSkmer.length();
 
-        // If the read has a stop codon, go to next reading frame:
-        // stop_c = toCSkmer.find_first_of('*');
-        // if(stop_c<10) continue;
-        l = toCSkmer.length();
-
-        // Get kmer from a random position
-        // KMER = toCSkmer.substr(rx, kmer_size);
-
-        // ishash = signature_hash_full.count(KMER.substr(0,kmer_size));
-        ishash = 0;
-        // make n tries to get the right kmer from the read
-        int tries = 0;
-        // if(ishash>0){
-        // ishash = 0;
-        // rx=0;
-        while (1)
-        {
+            // select a random position
+            std::uniform_int_distribution<int> uni(0, l - args->kmer - 1);
             rx = uni(rng);
-
-            KMER = toCSkmer.substr(rx, args->kmer);
-            ishash = master_signature_hash_full.count(KMER);
-            if (ishash > 0)
-                break;
-            // if(tries == l-kmer_size) break;
-            if (tries == args->tries)
-                break;
-            tries++;
-            // rx++;
-        }
-        // }
-
-        // std::cout << ishash << "\t" << KMER << std::endl;
-
-        int manykmers = 0;
-        // Got a kmer at all?, great, make a sentence and predict!! :)
-        if (ishash > 0)
-        {
-            pre_buffer = KMER;
-
-            for (int ki = 0; ki < l - args->kmer; ki += args->kmer)
+            ishash = 0;
+            int tries = 0;
+            while (1)
             {
-                // rx = uni(rng);
-                rx = ki;
-                // TODO: Fixed kmer length for the substraction of subsequences. This parameter is fixed and is the same used for the training.
-                // variable_kmer = random_mer_size(rng);
-                pkmer = toCSkmer.substr(rx, args->kmer);
-                // std::cout << variable_kmer << std::endl;
-                // pseed = toCSkmer.substr(rx, args->seed);
-                pre_buffer += ' ' + pkmer;
-                // if (manykmers < args->mink)
-                // {
-                //     if (master_signature_hash_full.count(pkmer) > 0)
-                //     {
-                //         manykmers++;
-                //     }
-                // }
-                pkmer.clear();
+                rx = uni(rng);
+                KMER = toCSkmer.substr(rx, args->kmer);
+                ishash = master_signature_hash_full.count(KMER);
+                if (ishash > 0)
+                    break;
+                if (tries == args->tries)
+                    break;
+                tries++;
             }
 
-            // if (manykmers >= args->mink)
-            // {
-
-            // buffer+=signature_hash_full[KMER]+' '+pre_buffer+'\n';
-
-            if (length(ids[total_reads]) > 1)
+            // If there is at least one key in the hash table
+            if (ishash > 0)
             {
-                // Check if the read has a proper header
+                pre_buffer = KMER;
+
+                // traverse the ORF and get the kmers for prediction
+                // Using a sliding window of 1
+                for (int ki = 0; ki < l - args->kmer - 1; ki++)
+                {
+                    pkmer = toCSkmer.substr(ki, args->kmer);
+                    pre_buffer += ' ' + pkmer;
+                    pkmer.clear();
+                }
+
                 buffer += pre_buffer + '\n';
                 pre_buffer.clear();
 
-                readLabels.push_back(seqan::toCString(ids[total_reads]));
-                std::stringstream iseq;
-                iseq << seqs[total_reads];
-                if (args->seq)
+                read_labels.push_back(seqan::toCString(ids[dna_sequence]));
+
+                // store the sequences if they need to be reported in a file
+                if (args->fastaOutput)
                 {
+                    std::stringstream iseq;
+                    iseq << seqs[dna_sequence];
                     readSeqs.push_back(iseq.str());
+                    iseq.clear();
                 }
-
-                num_reads++;
+                else
+                {
+                    readSeqs.push_back(" ");
+                }
             }
-            // }
         }
-
-        // seqan::clear(aaSeqs[iframe]);
-        iframe++;
     }
 
-    seqan::clear(seqs);
-    seqan::clear(aaSeqs);
-    seqan::clear(ids);
-
-    //  mtx.unlock();
-    // std::unordered_map < std::string, std::tuple < std::string, float > > FuncPredLocal;
     std::stringstream trex(buffer);
-    buffer.clear();
-    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
+    fasttext.predict(trex, 1, false, read_labels, 0, FuncPred, readSeqs, args->seq);
 
-    // std::cout << seqan::length(readLabels) << "\t" << seqan::length(readSeqs) << std::endl;
-    // mtx.lock();
-    // FuncPred = FuncPredLocal;
-    // mtx.unlock();
-
+    // clearing variables to free memory
     trex.str(std::string());
-    readLabels.clear();
+    read_labels.clear();
     readSeqs.clear();
-    // buffer.clear();
-    // signature_hash.clear();
-    // signature_hash_full.clear();
-    seqan::clear(aaSeqs);
+    buffer.clear();
+    seqan::clear(seqs);
+    seqan::clear(ids);
+    seqan::clear(reading_frames_sequences);
 }
 
 void Signatures::Display(std::string message)

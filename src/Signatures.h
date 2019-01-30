@@ -10,7 +10,6 @@
 #include <string>
 #include <thread>
 
-
 #include "sparsepp/spp.h"
 #include "hop/hopscotch_map.h"
 #include <fasttext.h>
@@ -25,35 +24,35 @@
 
 using spp::sparse_hash_map;
 
-class Signatures {
+class Signatures
+{
 
-    public:
+  public:
+    std::string file_model;
+    std::string fsignatures;
 
-        std::string file_model;
-        std::string fsignatures;
+    fasttext::FastText fasttext;
+    fasttext::FastText skipgram;
 
-        fasttext::FastText fasttext;
-        fasttext::FastText skipgram;
+    std::vector<std::vector<std::string>> LABELS;
+    std::vector<std::stringstream> KMER_LIST;
 
-        std::vector < std::vector< std::string> > LABELS;
-        std::vector < std::stringstream > KMER_LIST;
-        
-        tsl::hopscotch_map< std::string, bool> master_signature_hash; // 7-mer
-        tsl::hopscotch_map< std::string, bool> master_signature_hash_full; //11-mer
-        
-        int kmer_size;
-        int seed_size;
-        bool isreduced;
-        
-        std::shared_ptr<fasttext::Args> args;
+    tsl::hopscotch_map<std::string, bool> master_signature_hash;      // 7-mer
+    tsl::hopscotch_map<std::string, bool> master_signature_hash_full; //11-mer
 
-        Signatures(std::shared_ptr<fasttext::Args>);
-        void predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::StringSet<seqan::CharString> &ids, std::vector<std::string>& readLabels, std::string& buffer, std::unordered_map < std::string, std::tuple < std::string, float > >& FuncPred);
-        void Display(std::string message);
-   
+    int kmer_size;
+    int seed_size;
+    bool isreduced;
 
-    private: 
-        std::string MapSignatures(std::string header, std::string read);
+    std::shared_ptr<fasttext::Args> args;
+
+    Signatures(std::shared_ptr<fasttext::Args>);
+    void predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::StringSet<seqan::CharString> &ids, std::vector<std::string> &readLabels, std::string &buffer, std::unordered_map<std::string, std::tuple<std::string, float>> &FuncPred);
+    void filter(seqan::StringSet<seqan::Dna5String> &seqs, seqan::StringSet<seqan::CharString> &ids, std::vector<std::string> &readLabels, std::string &buffer, std::unordered_map<std::string, std::tuple<std::string, float>> &FuncPred);
+    void Display(std::string message);
+
+  private:
+    std::string MapSignatures(std::string header, std::string read);
 };
 
 #endif
