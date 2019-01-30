@@ -47,7 +47,7 @@ Args::Args()
     seed = 11;
     db = "";
     mink = 3;
-    tries = 1;
+    tries = 2;
     reduced = true;
     seq = true;
     minSeqLen = 100;
