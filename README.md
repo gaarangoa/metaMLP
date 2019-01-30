@@ -5,8 +5,8 @@ Performance of MetaMLP is comparable to diamond blastx with an identity cutoff o
 
 ## Installation
 
-        git clone https://github.com/gaarangoa/ARGfast.git
-        cd ARGfast
+        git clone https://github.com/gaarangoa/metamlp.git
+        cd metamlp
         make clean && make
 
 ### Usage
