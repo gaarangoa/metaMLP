@@ -64,7 +64,10 @@ void printIndexUsage()
         << "  -loss         loss function {ns, hs, softmax} [default softmax]\n\n"
 
         << "Optional Alphabet Parameters: \n\n"
-        << "  -NoReduced    Dissable the reduced alphabet and use all 20 Amino Acids\n"
+        << "  -NoReduced    Dissable the reduced alphabet and use all 20 Amino Acids\n\n"
+
+        << "Optional Output: \n\n"
+        << "  -fastaOutput    save fasta file with predicted sequences [default False]\n"
 
         << std::endl;
 }
@@ -148,6 +151,7 @@ void quant(int argc, char **argv)
 
     std::ofstream fo(report_file);
     std::ofstream fabn(report_file + ".abn");
+    std::ofstream fasta_o(report_file + ".fasta");
 
     std::cout << "Processing Input File" << std::endl;
 
@@ -183,17 +187,12 @@ void quant(int argc, char **argv)
     // REDUCE SECTION
     // ********************************************************************************************************
 
-    std::cout << entries << " Processed sequences " << std::endl;
-    std::cout << arglike << " Annotated sequences " << std::endl;
-
-    std::cout << "Computing Relative Abundances" << std::endl;
-
     for (int i = 0; i < NUM_THREADS; i++)
     {
         for (const auto &arglabel : td[i].FuncPred)
         {
             // if a minimum probability of 0.5 report the sequence
-            if (std::get<1>(arglabel.second) > a->minProbability)
+            if (std::get<1>(arglabel.second) >= a->minProbability)
             {
                 // report individual classification
                 label_sequence = fasttext::utils::splitString(std::get<0>(arglabel.second), '\t');
@@ -201,13 +200,24 @@ void quant(int argc, char **argv)
                 // Report: sequence_id --> predicted_label --> probability
                 fo << arglabel.first << "\t" << label_sequence[0] << "\t" << std::get<1>(arglabel.second) << "\n";
 
+                // Report fasta file if enabled
+                if (a->fastaOutput)
+                {
+                    fasta_o << ">" << arglabel.first << "|" << label_sequence[0] << std::endl
+                            << label_sequence[1] << std::endl;
+                }
+
                 absolute_abundance[label_sequence[0]] += 1;
                 arglike++;
             }
         }
     }
 
+    std::cout << entries << " Processed sequences " << std::endl;
+    std::cout << arglike << " Annotated sequences " << std::endl;
+
     // printout results:
+    std::cout << "Computing Relative Abundances" << std::endl;
     std::stringstream ARGc;
     std::string HMP;
     for (const auto &item : absolute_abundance)

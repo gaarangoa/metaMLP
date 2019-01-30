@@ -184,11 +184,18 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
 
                 read_labels.push_back(seqan::toCString(ids[dna_sequence]));
 
-                // std::stringstream iseq;
-                // iseq << seqs[dna_sequen/ce];
-                // readSeqs.push_back(iseq.str());
-                // iseq.clear();
-                readSeqs.push_back(" ");
+                // store the sequences if they need to be reported in a file
+                if (args->fastaOutput)
+                {
+                    std::stringstream iseq;
+                    iseq << seqs[dna_sequence];
+                    readSeqs.push_back(iseq.str());
+                    iseq.clear();
+                }
+                else
+                {
+                    readSeqs.push_back(" ");
+                }
             }
         }
     }

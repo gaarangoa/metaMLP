@@ -38,6 +38,7 @@ class Args
     std::string test;
     std::string output;
     bool reportSequences;
+    bool fastaOutput;
     float minProbability;
 
     int minReadChunkSize;

@@ -51,6 +51,7 @@ Args::Args()
     reduced = true;
     seq = true;
     minSeqLen = 100;
+    fastaOutput = false;
 
     qout = false;
     retrain = false;
@@ -97,6 +98,10 @@ void Args::parseArgs(int argc, char **argv)
         else if (strcmp(argv[ai], "-minReadChunkSize") == 0)
         {
             minReadChunkSize = atoi(argv[ai + 1]);
+        }
+        else if (strcmp(argv[ai], "-fastaOutput") == 0)
+        {
+            fastaOutput = true;
         }
         else if (strcmp(argv[ai], "-minProbability") == 0)
         {
