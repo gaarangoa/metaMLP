@@ -73,6 +73,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     // Reads up to 10 records
 
     std::vector<std::string> readSeqs;
+    std::vector<std::string> read_labels;
     std::vector<std::string> protSeqs;
 
     int num_reads = 1;
@@ -83,19 +84,17 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     /////////////////////////////////////////////////////
 
     // std::cout << "Open Reading Frames" << std::endl;
-    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> aaSeqs;
-    if (isreduced)
-    {
-        seqan::GeneticCode<seqan::MURPHY10> GCode; // reduce the aminoacid alphabet to 10
-        seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
-    }
-    else
-    {
-        seqan::GeneticCode<seqan::CANONICAL> GCode;
-        seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
-    }
-
-    typedef seqan::Iterator<seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>>>::Type AIter;
+    // seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> aaSeqs;
+    // if (isreduced)
+    // {
+    //     seqan::GeneticCode<seqan::MURPHY10> GCode; // reduce the aminoacid alphabet to 10
+    //     seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
+    // }
+    // else
+    // {
+    //     seqan::GeneticCode<seqan::CANONICAL> GCode;
+    //     seqan::translate(aaSeqs, seqs, seqan::SIX_FRAME, GCode);
+    // }
 
     //////////////////////////////////////////////////////////////////////////////
     /*.............FILTER READS BY SIGNATURES AND CLASSIFY .........*/
@@ -124,43 +123,37 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     // mtx.lock();
     int iframe = 0;
     // std::cout << "Traverse Reads file" << std::endl;
-    for (AIter it = begin(aaSeqs); it != end(aaSeqs); ++it)
+
+    // traverse the nucleotide sequences
+    typedef seqan::Iterator<seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>>>::Type reading_frames_iterator;
+    typedef seqan::Iterator<seqan::StringSet<seqan::DnaString>>::Type TStringSetIterator;
+
+    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
+    seqan::GeneticCode<seqan::MURPHY10> GCode;
+
+    for (unsigned dna_sequence = 0; dna_sequence < length(seqs); dna_sequence++)
     {
+        // get the reading frames for each one
+        seqan::translate(reading_frames_sequences, seqs[dna_sequence], seqan::SIX_FRAME, GCode);
 
-        KMER.clear();
-
-        if (frame == 6)
+        // traverse each reading frame
+        for (reading_frames_iterator it = begin(reading_frames_sequences); it != end(reading_frames_sequences); ++it)
         {
-            frame = 1;
-            total_reads++;
-        }
-        else
-        {
-            frame++;
-        }
+            KMER.clear();
 
-        std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 1);
-        rx = uni(rng); // random position
-        // Move iterator to a string-like structure
+            // transform iterator to a string
+            seqan::move(kimer, *it);
+            toCSkmer = seqan::toCString(kimer);
 
-        seqan::move(kimer, *it);
-        toCSkmer = seqan::toCString(kimer);
+            // length of the orf sequence
+            l = toCSkmer.length();
 
-        // If the read has a stop codon, go to next reading frame:
-        // stop_c = toCSkmer.find_first_of('*');
-        // if (stop_c < 30)
-        //     continue;
-
-        l = toCSkmer.length();
-
-        // Get kmer from a random position
-
-        ishash = 0;
-        // make n tries to get the right kmer from the read
-        int tries = 0;
-        while (1)
-        {
-            try
+            // select a random position
+            std::uniform_int_distribution<int> uni(0, l - args->kmer - 1);
+            rx = uni(rng);
+            ishash = 0;
+            int tries = 0;
+            while (1)
             {
                 rx = uni(rng);
                 KMER = toCSkmer.substr(rx, args->kmer);
@@ -171,54 +164,46 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
                     break;
                 tries++;
             }
-            catch (const std::exception e)
+
+            // If there is at least one key in the hash table
+            if (ishash > 0)
             {
+                pre_buffer = KMER;
+
+                // traverse the ORF and get the kmers for prediction
+                // Using a sliding window of 1
+                for (int ki = 0; ki < l - args->kmer - 1; ki++)
+                {
+                    pkmer = toCSkmer.substr(ki, args->kmer);
+                    pre_buffer += ' ' + pkmer;
+                    pkmer.clear();
+                }
+
+                buffer += pre_buffer + '\n';
+                pre_buffer.clear();
+
+                read_labels.push_back(seqan::toCString(ids[dna_sequence]));
+
+                // std::stringstream iseq;
+                // iseq << seqs[dna_sequen/ce];
+                // readSeqs.push_back(iseq.str());
+                // iseq.clear();
+                readSeqs.push_back(" ");
             }
         }
-
-        int manykmers = 0;
-        // Got a kmer at all?, great, make a sentence and predict!! :)
-        if (ishash > 0)
-        {
-            pre_buffer = KMER;
-
-            for (int ki = 0; ki < l - args->kmer - 1; ki++)
-            {
-                pkmer = toCSkmer.substr(ki, args->kmer);
-                pre_buffer += ' ' + pkmer;
-                pkmer.clear();
-            }
-
-            // Check if the read has a proper header
-            // if (length(ids[total_reads]) > 1)
-            // {
-            //     buffer += pre_buffer + '\n';
-            //     pre_buffer.clear();
-
-            //     readLabels.push_back(seqan::toCString(ids[total_reads]));
-            //     std::stringstream iseq;
-            //     iseq << seqs[total_reads];
-
-            //     readSeqs.push_back(iseq.str());
-
-            //     num_reads++;
-            // }
-        }
-
-        iframe++;
     }
 
-    // std::stringstream trex(buffer);
-    // fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
+    std::stringstream trex(buffer);
+    fasttext.predict(trex, 1, false, read_labels, 0, FuncPred, readSeqs, args->seq);
 
-    // trex.str(std::string());
-    readLabels.clear();
+    // clearing variables to free memory
+    trex.str(std::string());
+    read_labels.clear();
     readSeqs.clear();
     buffer.clear();
-
-    seqan::clear(aaSeqs);
     seqan::clear(seqs);
     seqan::clear(ids);
+    seqan::clear(reading_frames_sequences);
 }
 
 void Signatures::Display(std::string message)
