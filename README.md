@@ -8,6 +8,7 @@ Performance of MetaMLP is comparable to diamond blastx with an identity cutoff o
         git clone https://github.com/gaarangoa/metamlp.git
         cd metamlp
         make clean && make
+        sudo cp ./bin/metaMLP /usr/bin/
 
 ### Usage
 #### metaMLP
