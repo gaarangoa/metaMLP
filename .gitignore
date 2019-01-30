@@ -9,7 +9,7 @@
 *.pch
 
 # Compiled Dynamic libraries
-*.so 
+*.so
 *.dylib
 *.dll
 
@@ -31,3 +31,4 @@
 .vscode/
 bin/
 test/
+validation/
