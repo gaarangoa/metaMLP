@@ -59,6 +59,8 @@ void printIndexUsage()
         << "  -minn         minimum length of kmer ngram [default 3]\n"
         << "  -maxn         maximum length of kmer ngram [default 7]\n"
         << "  -ws           size of context window for building embeddings [default 5]\n"
+        << "  -minCount     minimum ngram count [default 1]\n"
+        << "  -wordNgrams   embedding joint ngrams [default 1]\n"
         << "  -loss         loss function {ns, hs, softmax} [default softmax]\n\n"
 
         << "Optional Alphabet Parameters: \n\n"

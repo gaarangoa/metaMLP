@@ -21,7 +21,7 @@ Args::Args()
 {
     minProbability = 0.8;
     lr = 1;
-    dim = 100;
+    dim = 64;
     ws = 5;
     epoch = 100;
     minCount = 1;
