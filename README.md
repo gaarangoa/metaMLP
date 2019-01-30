@@ -96,3 +96,5 @@ To perform the functional profiling you need to use the quant command. The input
             -kmer 11 \
             -tries 2
 
+### contact
+Gustavo Arango (gustavo1@vt.edu)
