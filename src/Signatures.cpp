@@ -212,13 +212,13 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     seqan::clear(aaSeqs);
     seqan::clear(ids);
 
-    std::stringstream trex(buffer);
-    buffer.clear();
-    fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
+    // std::stringstream trex(buffer);
+    // buffer.clear();
+    // fasttext.predict(trex, 1, false, readLabels, 0, FuncPred, readSeqs, args->seq);
 
-    trex.str(std::string());
-    readLabels.clear();
-    readSeqs.clear();
+    // trex.str(std::string());
+    // readLabels.clear();
+    // readSeqs.clear();
 
     seqan::clear(aaSeqs);
 }
