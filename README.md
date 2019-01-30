@@ -1,5 +1,5 @@
 ## MetaMLP
-MetaMLP is a fast approach to annotate metagenomic datasets agains a protein reference database. It compares sequence reads against a protein database, similar to what blastx does. However, instead of performing sequence alignment, it uses word embeddings to represent kmers as vectors. MetaMLP is built from the FastText library for text classification in combination with the seqan library to perform fast I/O opperations and to perform the six reading frame translation. To index protein sequences (reference database) we use the reduced alphabet proposed in RAPSearch. metaMLP is several orders of magnituf faster than blastx and diamond.
+MetaMLP is a fast approach to annotate metagenomic datasets against a protein reference database. It compares sequence reads against a protein database, similar to what blastx does. However, instead of performing sequence alignment, it uses word embeddings to represent kmers as vectors. MetaMLP is built from the FastText library for text classification in combination with the seqan library to perform fast I/O opperations and to perform the six reading frame translation. To index protein sequences (reference database) we use the reduced alphabet proposed in RAPSearch. metaMLP is several orders of magnituf faster than blastx and diamond.
 
 Performance of MetaMLP is comparable to diamond blastx with an identity cutoff of 80%, but, its around 40 times faster.
 
@@ -15,8 +15,8 @@ Performance of MetaMLP is comparable to diamond blastx with an identity cutoff o
 
         The commands supported by metaMLP are:
 
-            index              Index the reference sequences
-            quant              Run quantification algorithm [prediction]
+            index         Index the reference sequences
+            quant         Run quantification algorithm [prediction]
 
 #### Index
         usage: metaMLP index <args>
@@ -46,7 +46,7 @@ Performance of MetaMLP is comparable to diamond blastx with an identity cutoff o
 
         Optional Output:
 
-            -fastaOutput    save fasta file with predicted sequences [default False]
+            -fastaOutput  save fasta file with predicted sequences [default False]
 
 #### Annotation
         usage: metaMLP quant <args>
