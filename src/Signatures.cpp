@@ -124,89 +124,89 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     // mtx.lock();
     int iframe = 0;
     // std::cout << "Traverse Reads file" << std::endl;
-    for (AIter it = begin(aaSeqs); it != end(aaSeqs); ++it)
-    {
+    // for (AIter it = begin(aaSeqs); it != end(aaSeqs); ++it)
+    // {
 
-        KMER.clear();
+    //     KMER.clear();
 
-        if (frame == 6)
-        {
-            frame = 1;
-            total_reads++;
-        }
-        else
-        {
-            frame++;
-        }
+    //     if (frame == 6)
+    //     {
+    //         frame = 1;
+    //         total_reads++;
+    //     }
+    //     else
+    //     {
+    //         frame++;
+    //     }
 
-        std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 1);
-        rx = uni(rng); // random position
-        // Move iterator to a string-like structure
+    //     std::uniform_int_distribution<int> uni(0, length(*it) - args->kmer - 1);
+    //     rx = uni(rng); // random position
+    //     // Move iterator to a string-like structure
 
-        seqan::move(kimer, *it);
-        toCSkmer = seqan::toCString(kimer);
+    //     seqan::move(kimer, *it);
+    //     toCSkmer = seqan::toCString(kimer);
 
-        // If the read has a stop codon, go to next reading frame:
-        // stop_c = toCSkmer.find_first_of('*');
-        // if (stop_c < 30)
-        //     continue;
+    //     // If the read has a stop codon, go to next reading frame:
+    //     // stop_c = toCSkmer.find_first_of('*');
+    //     // if (stop_c < 30)
+    //     //     continue;
 
-        l = toCSkmer.length();
+    //     l = toCSkmer.length();
 
-        // Get kmer from a random position
+    //     // Get kmer from a random position
 
-        ishash = 0;
-        // make n tries to get the right kmer from the read
-        int tries = 0;
-        while (1)
-        {
-            try
-            {
-                rx = uni(rng);
-                KMER = toCSkmer.substr(rx, args->kmer);
-                ishash = master_signature_hash_full.count(KMER);
-                if (ishash > 0)
-                    break;
-                if (tries == args->tries)
-                    break;
-                tries++;
-            }
-            catch (const std::exception e)
-            {
-            }
-        }
+    //     ishash = 0;
+    //     // make n tries to get the right kmer from the read
+    //     int tries = 0;
+    //     while (1)
+    //     {
+    //         try
+    //         {
+    //             rx = uni(rng);
+    //             KMER = toCSkmer.substr(rx, args->kmer);
+    //             ishash = master_signature_hash_full.count(KMER);
+    //             if (ishash > 0)
+    //                 break;
+    //             if (tries == args->tries)
+    //                 break;
+    //             tries++;
+    //         }
+    //         catch (const std::exception e)
+    //         {
+    //         }
+    //     }
 
-        int manykmers = 0;
-        // Got a kmer at all?, great, make a sentence and predict!! :)
-        if (ishash > 0)
-        {
-            pre_buffer = KMER;
+    //     int manykmers = 0;
+    //     // Got a kmer at all?, great, make a sentence and predict!! :)
+    //     if (ishash > 0)
+    //     {
+    //         pre_buffer = KMER;
 
-            for (int ki = 0; ki < l - args->kmer; ki++)
-            {
-                pkmer = toCSkmer.substr(ki, args->kmer);
-                pre_buffer += ' ' + pkmer;
-                pkmer.clear();
-            }
+    //         for (int ki = 0; ki < l - args->kmer; ki++)
+    //         {
+    //             pkmer = toCSkmer.substr(ki, args->kmer);
+    //             pre_buffer += ' ' + pkmer;
+    //             pkmer.clear();
+    //         }
 
-            // Check if the read has a proper header
-            if (length(ids[total_reads]) > 1)
-            {
-                buffer += pre_buffer + '\n';
-                pre_buffer.clear();
+    //         // Check if the read has a proper header
+    //         if (length(ids[total_reads]) > 1)
+    //         {
+    //             buffer += pre_buffer + '\n';
+    //             pre_buffer.clear();
 
-                readLabels.push_back(seqan::toCString(ids[total_reads]));
-                std::stringstream iseq;
-                iseq << seqs[total_reads];
+    //             readLabels.push_back(seqan::toCString(ids[total_reads]));
+    //             std::stringstream iseq;
+    //             iseq << seqs[total_reads];
 
-                readSeqs.push_back(iseq.str());
+    //             readSeqs.push_back(iseq.str());
 
-                num_reads++;
-            }
-        }
+    //             num_reads++;
+    //         }
+    //     }
 
-        iframe++;
-    }
+    //     iframe++;
+    // }
 
     seqan::clear(seqs);
     seqan::clear(aaSeqs);
