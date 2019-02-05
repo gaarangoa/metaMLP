@@ -72,6 +72,13 @@ void printIndexUsage()
         << std::endl;
 }
 
+void printPrintSentenceVectorsUsage()
+{
+    std::cerr
+        << "usage: fasttext print-sentence-vectors <model>\n\n"
+        << "  <model>      model filename\n"
+        << std::endl;
+}
 struct thread_data
 {
 
@@ -271,6 +278,19 @@ void index(int argc, char **argv)
     exit(0);
 }
 
+void printSentenceVectors(int argc, char **argv)
+{
+    if (argc != 3)
+    {
+        printPrintSentenceVectorsUsage();
+        exit(EXIT_FAILURE);
+    }
+    fasttext::FastText fasttext;
+    fasttext.loadModel(std::string(argv[2]));
+    fasttext.printSentenceVectors();
+    exit(0);
+}
+
 //Main Function
 int main(int argc, char **argv)
 {
@@ -288,6 +308,10 @@ int main(int argc, char **argv)
     else if (command == "quant")
     {
         quant(argc, argv);
+    }
+    else if (command == "print-word-vectors")
+    {
+        printSentenceVectors(argc, argv);
     }
     else
     {
