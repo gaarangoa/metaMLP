@@ -76,7 +76,7 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
     seqan::CharString seq;
     std::ifstream input(finput);
 
-    std::string label, prelabel;
+    std::string label, prelabel, all_labels;
     std::string rProt; // protein with the reduced alphabet
     std::string kml;
     std::string fragment;
@@ -100,9 +100,9 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
     while (!atEnd(seqFileIn))
     {
-        std::cout << proteins << " processed reads"
-                  << "\r";
-        std::cout.flush();
+        //     std::cout << proteins << " processed reads"
+        //               << "\r";
+        //     std::cout.flush();
 
         seqan::readRecord(id, seq, seqFileIn);
 
@@ -116,7 +116,16 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
         }
 
         prelabel = split(seqan::toCString(id), '|')[label_index];
-        label = "__label__" + prelabel + "__";
+
+        std::vector<std::string> _labels = split(prelabel, ';');
+        std::stringstream _tagged_labels;
+
+        for (int index_label = 0; index_label < _labels.size(); index_label++)
+        {
+            _tagged_labels << " __label__" << _labels[index_label] << "__ ";
+        }
+
+        label = _tagged_labels.str();
 
         Sl = rProt.length(); // length of the protein sequence
         proteins++;
