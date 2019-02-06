@@ -201,7 +201,7 @@ void Signatures::predict(seqan::StringSet<seqan::Dna5String> &seqs, seqan::Strin
     }
 
     std::stringstream trex(buffer);
-    fasttext.predict(trex, 1, false, read_labels, 0, FuncPred, readSeqs, args->seq);
+    fasttext.predict(trex, 5, false, read_labels, 0, FuncPred, readSeqs, args->seq);
 
     // clearing variables to free memory
     trex.str(std::string());

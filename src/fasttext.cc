@@ -432,6 +432,7 @@ void FastText::predict(std::istream &in, int32_t k, bool print_prob, std::vector
 
     while (in.peek() != EOF)
     {
+
         predict(in, k, predictions);
         if (predictions.empty())
         {
@@ -439,56 +440,71 @@ void FastText::predict(std::istream &in, int32_t k, bool print_prob, std::vector
             position++;
             continue;
         }
+
+        std::stringstream _predictions;
+
+        float _best_probability = 0.0;
+        // traverse the predictions and obtain the labels with a >0.1 probability
+        // it->first: probability
+        // it->second: label
         for (auto it = predictions.cbegin(); it != predictions.cend(); it++)
         {
-            if (it != predictions.cbegin())
+            // Here we check the best probability out of all labels (don't care much which label)
+            if (exp(it->first) > _best_probability)
             {
-                // std::cout << " "<<std::endl;
+                _best_probability = exp(it->first);
             }
-            std::string x = ReadLabels[position];
-            // std::cout << it->second << "\t" << exp(it->first) << std::endl;
 
-            // If the read id exists; then check if the probability is higher, if so, replace the content, kind of a best hit.
-            if (sizeof(FuncPred[ReadLabels[position]]) > 0)
+            // to consider a label we need to have at least a probability > 0.1
+            if (exp(it->first) >= 0.1)
             {
-
-                if (std::get<1>(FuncPred[ReadLabels[position]]) < exp(it->first))
-                {
-                    std::get<1>(ItemValue) = exp(it->first);
-                    if (addSeq)
-                    {
-                        std::get<0>(ItemValue) = it->second + '\t' + ReadSeqs[position];
-                    }
-                    else
-                    {
-                        std::get<0>(ItemValue) = it->second;
-                    }
-
-                    FuncPred[ReadLabels[position]] = ItemValue;
-                }
+                _predictions << it->second << "prob__" << exp(it->first);
             }
-            else
-            {
-                //   // If the read does not exists, just, create a new entry
+        }
 
-                std::get<1>(ItemValue) = exp(it->first);
+        // now check if there is another read called exaclty the same and pick up the one with the highest probability
+        // If the read id exists; then check if the probability is higher, if so, replace the content, kind of a best hit.
+        std::string read_id = ReadLabels[position];
+        if (sizeof(FuncPred[read_id]) > 0)
+        {
+            // If the read exists we need to check if the prediction is better or not.
+            // There are two scenarios where this can happen:
+            // 1) There are more than one reading frame. In that case, the read_id is the same
+            //    and we need to select the best one
+            // 2) There are paired end reads. In this case, pick up the best annotation.
+
+            if (std::get<1>(FuncPred[read_id]) < _best_probability)
+            {
+                std::get<1>(ItemValue) = _best_probability;
                 if (addSeq)
                 {
-                    std::get<0>(ItemValue) = it->second + '\t' + ReadSeqs[position];
+                    std::get<0>(ItemValue) = _predictions.str() + '\t' + ReadSeqs[position];
                 }
                 else
                 {
-                    std::get<0>(ItemValue) = it->second;
+                    std::get<0>(ItemValue) = _predictions.str();
                 }
 
-                FuncPred[ReadLabels[position]] = ItemValue;
+                FuncPred[read_id] = ItemValue;
+            }
+        }
+        else
+        {
+            // here we are adding to the tupple the best probability for that read
+            std::get<1>(ItemValue) = _best_probability;
+            if (addSeq)
+            {
+                // here we need to add to the tuple the label and the sequence
+                std::get<0>(ItemValue) = _predictions.str() + '\t' + ReadSeqs[position];
+            }
+            else
+            {
+                // Here only add the predictions
+                std::get<0>(ItemValue) = _predictions.str();
             }
 
-            // absolute_abundance[it->second]++;
-            if (print_prob)
-            {
-                // std::cout << " " << exp(it->first);
-            }
+            // Finally we add to the hash[read_id] the best probability and the predictions
+            FuncPred[read_id] = ItemValue;
         }
 
         position++;

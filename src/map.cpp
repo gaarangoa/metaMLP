@@ -208,7 +208,7 @@ void quant(int argc, char **argv)
                 label_sequence = fasttext::utils::splitString(std::get<0>(arglabel.second), '\t');
 
                 // Report: sequence_id --> predicted_label --> probability
-                fo << arglabel.first << "\t" << label_sequence[0] << "\t" << std::get<1>(arglabel.second) << "\n";
+                fo << arglabel.first << "\t" << label_sequence[0] << "\n";
 
                 // Report fasta file if enabled
                 if (a->fastaOutput)
@@ -217,7 +217,10 @@ void quant(int argc, char **argv)
                             << label_sequence[1] << std::endl;
                 }
 
-                absolute_abundance[label_sequence[0]] += 1;
+                std::vector<std::string> predictions = fasttext::utils::splitStringDelims(label_sequence[0], "__label__");
+                std::vector<std::string> best_prediction = fasttext::utils::splitStringDelims(predictions[1], "__prob__");
+
+                absolute_abundance[best_prediction[0]] += 1;
                 arglike++;
             }
         }
@@ -234,7 +237,7 @@ void quant(int argc, char **argv)
     {
         ARGc << item.first;
         HMP = ARGc.str();
-        fabn << HMP.replace(HMP.length() - 2, HMP.length(), "").replace(0, 9, "") << "\t" << std::to_string(item.second) << std::endl;
+        fabn << HMP << "\t" << std::to_string(item.second) << std::endl;
         ARGc.str(std::string());
     }
 
