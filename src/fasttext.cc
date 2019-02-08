@@ -226,7 +226,7 @@ void FastText::printInfo(real progress, real loss)
     int etah = eta / 3600;
     int etam = (eta - etah * 3600) / 60;
     // std::cout << std::fixed;
-    std::cout << "\rProgress: " << std::setprecision(1) << 100 * progress << "%" << std::endl;
+    std::cout << "\rProgress: " << std::setprecision(1) << 100 * progress << "%" << std::flush;
     //   << "  words/sec/thread: " << std::setprecision(0) << wst << "  lr: " << std::setprecision(6) << lr << "  loss: " << std::setprecision(6) << loss << "  eta: " << etah << "h" << etam << "m " << std::flush;
 }
 
