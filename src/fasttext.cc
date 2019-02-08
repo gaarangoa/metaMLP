@@ -225,13 +225,9 @@ void FastText::printInfo(real progress, real loss)
     int eta = int(t / progress * (1 - progress) / args_->thread);
     int etah = eta / 3600;
     int etam = (eta - etah * 3600) / 60;
-    std::cerr << std::fixed;
-    std::cerr << "\rProgress: " << std::setprecision(1) << 100 * progress << "%";
-    // std::cerr << "  words/sec/thread: " << std::setprecision(0) << wst;
-    // std::cerr << "  lr: " << std::setprecision(6) << lr;
-    std::cerr << "  loss: " << std::setprecision(6) << loss;
-    std::cerr << "  eta: " << etah << "h" << etam << "m ";
-    std::cerr << std::flush;
+    std::cout << std::fixed;
+    std::cout << "\rProgress: " << std::setprecision(1) << 100 * progress << "%"
+              << "  words/sec/thread: " << std::setprecision(0) << wst << "  lr: " << std::setprecision(6) << lr << "  loss: " << std::setprecision(6) << loss << "  eta: " << etah << "h" << etam << "m " << std::flush;
 }
 
 std::vector<int32_t> FastText::selectEmbeddings(int32_t cutoff) const
