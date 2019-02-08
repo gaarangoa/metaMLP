@@ -28,6 +28,7 @@ Performance of MetaMLP is comparable to diamond blastx with an identity cutoff o
             -output       Output index
             -kmer         k-mer size (aminoacids) [default 11]
             -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)
+                          for multiple labels use >xx|xx|xx|label1;label2;label3|xx|xx
 
         Optional Training Parameters:
 

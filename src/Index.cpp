@@ -100,9 +100,9 @@ void Index::indexing(std::string finput, std::string output, int kmer, int label
 
     while (!atEnd(seqFileIn))
     {
-        //     std::cout << proteins << " processed reads"
-        //               << "\r";
-        //     std::cout.flush();
+        std::cout << proteins << " processed reads"
+                  << "\r";
+        std::cout.flush();
 
         seqan::readRecord(id, seq, seqFileIn);
 

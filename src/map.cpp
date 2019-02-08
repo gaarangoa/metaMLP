@@ -37,7 +37,10 @@ void printPredictUsage()
         << "  -minReadChunkSize Load reads in memory [default 10000]\n\n"
 
         << "Optional Alphabet Parameters: \n\n"
-        << "  -NoReduced        Enable it if index is built with the -NoReduced option\n"
+        << "  -NoReduced        Enable it if index is built with the -NoReduced option\n\n"
+
+        << "Optional Output: \n\n"
+        << "  -fastaOutput    save fasta file with predicted sequences [default False]\n"
         << std::endl;
 }
 
@@ -49,8 +52,8 @@ void printIndexUsage()
         << "  -input        Protein reference database\n"
         << "  -output       Output index\n"
         << "  -kmer         k-mer size (aminoacids) [default 11]\n"
-        << "  -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)\n\n"
-
+        << "  -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)\n"
+        << "                for multiple labels use ; >xx|xx|xx|label1;label2;label3|xx|xx\n\n"
         << "Optional Training Parameters: \n\n"
 
         << "  -dim          word vector size [default 64] adjust for large number of classes\n"
@@ -65,9 +68,6 @@ void printIndexUsage()
 
         << "Optional Alphabet Parameters: \n\n"
         << "  -NoReduced    Dissable the reduced alphabet and use all 20 Amino Acids\n\n"
-
-        << "Optional Output: \n\n"
-        << "  -fastaOutput    save fasta file with predicted sequences [default False]\n"
 
         << std::endl;
 }
