@@ -10,6 +10,7 @@
 #ifndef FASTTEXT_ARGS_H
 #define FASTTEXT_ARGS_H
 
+#include <map>
 #include <istream>
 #include <ostream>
 #include <string>
@@ -86,6 +87,7 @@ class Args
 
     // hash table for prediction
     tsl::hopscotch_map<std::string, bool> master_signature_hash_full;
+    tsl::hopscotch_map<std::string, std::tuple<std::string, float>> predicted_reads;
 
     void parseArgs(int, char **);
     void printHelp();

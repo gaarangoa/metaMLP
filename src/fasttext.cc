@@ -19,6 +19,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <map>
 
 namespace fasttext
 {
@@ -403,7 +404,7 @@ void FastText::predict(std::istream &in, int32_t k, std::vector<std::pair<real, 
     }
 }
 
-void FastText::predict_line(std::istream &in, int32_t k, std::string header, std::ofstream &ofile)
+void FastText::predict_line(std::istream &in, int32_t k, std::string header, std::string dna_sequence, std::ofstream &ofile)
 {
     std::vector<std::pair<real, std::string>> predictions;
 
@@ -420,10 +421,45 @@ void FastText::predict_line(std::istream &in, int32_t k, std::string header, std
             continue;
         }
 
-        ofile << header << "\t";
+        // ofile << header << "\t";
         for (auto it = predictions.cbegin(); it != predictions.cend(); it++)
         {
             ofile << it->second << "__" << exp(it->first) << ";";
+
+            // If the read id exists; then check if the probability is higher, if so, replace the content, kind of a best hit.
+            // if (sizeof(args_->predicted_reads[header]) > 0)
+            // {
+
+            //     if (std::get<1>(args_->predicted_reads[header]) < exp(it->first))
+            //     {
+            //         std::get<1>(ItemValue) = exp(it->first);
+            //         if (args_->fastaOutput)
+            //         {
+            //             std::get<0>(ItemValue) = it->second + '\t' + dna_sequence;
+            //         }
+            //         else
+            //         {
+            //             std::get<0>(ItemValue) = it->second;
+            //         }
+
+            //         args_->predicted_reads[header] = ItemValue;
+            //     }
+            // }
+            // else
+            // {
+            //     //   // If the read does not exists, just, create a new entry
+            //     std::get<1>(ItemValue) = exp(it->first);
+            //     if (args_->fastaOutput)
+            //     {
+            //         std::get<0>(ItemValue) = it->second + '\t' + dna_sequence;
+            //     }
+            //     else
+            //     {
+            //         std::get<0>(ItemValue) = it->second;
+            //     }
+
+            //     args_->predicted_reads[header] = ItemValue;
+            // }
         }
 
         ofile << std::endl;
@@ -828,9 +864,7 @@ void FastText::process_read(
     std::string header,
     std::string sequence,
     std::ofstream &ofile,
-    seqan::Dna5String dna_sequence,
-    seqan::GeneticCode<seqan::MURPHY10> GCode,
-    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences)
+    seqan::GeneticCode<seqan::MURPHY10> GCode)
 {
     // ofile << header << ":" << sequence << std::endl;
 
@@ -839,11 +873,12 @@ void FastText::process_read(
     int ishash;
     int rx;
 
+    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
+    seqan::Dna5String dna_sequence = sequence;
     std::string KMER;
     std::string toCSkmer;
     seqan::String<char> kimer;
 
-    dna_sequence = sequence;
     seqan::translate(reading_frames_sequences, sequence, seqan::SIX_FRAME, GCode);
     for (reading_frames_iterator it = begin(reading_frames_sequences); it != end(reading_frames_sequences); ++it)
     {
@@ -882,18 +917,7 @@ void FastText::process_read(
                 buffer << ' ' + toCSkmer.substr(ki, args_->kmer);
             }
 
-            // buffer << '\n';
-            predict_line(buffer, 5, header, ofile);
-
-            // ofile << header << '\t' << buffer.str() << std::endl;
-            // buffer.str(std::string());
-
-            // store the sequences if they need to be reported in a file
-            if (args_->fastaOutput)
-            {
-                // std::stringstream iseq;
-                // iseq.clear();
-            }
+            predict_line(buffer, 5, header, sequence, ofile);
         }
     }
 }
@@ -910,21 +934,19 @@ void FastText::mapThread(int32_t threadId)
     {
         file_end_position = file_size;
     }
-    else
-    {
-        file_end_position = get_right_position(args_->input, file_end_position);
-    }
+    // else
+    // {
+    //     file_end_position = get_right_position(args_->input, file_end_position);
+    // }
 
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    seqan::Dna5String dna_sequence;
+    // std::random_device rd;
+    // std::mt19937 rng(rd());
     seqan::GeneticCode<seqan::MURPHY10> GCode;
-    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
 
     utils::seek(ifs, file_start_position);
     std::string line, name, content;
     std::ofstream ofile;
-    ofile.open("th-" + std::to_string(threadId));
+    ofile.open("part-" + std::to_string(threadId));
 
     while (std::getline(ifs, line).good())
     {
@@ -941,9 +963,7 @@ void FastText::mapThread(int32_t threadId)
                     process_read(name,
                                  content,
                                  ofile,
-                                 dna_sequence,
-                                 GCode,
-                                 reading_frames_sequences);
+                                 GCode);
                 }
                 name.clear();
             }
@@ -975,9 +995,7 @@ void FastText::mapThread(int32_t threadId)
             process_read(name,
                          content,
                          ofile,
-                         dna_sequence,
-                         GCode,
-                         reading_frames_sequences);
+                         GCode);
         }
     }
 }

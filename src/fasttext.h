@@ -100,6 +100,7 @@ class FastText
         std::istream &,
         int32_t,
         std::string,
+        std::string,
         std::ofstream &);
 
     void predict(
@@ -130,9 +131,7 @@ class FastText
         std::string header,
         std::string sequence,
         std::ofstream &ofile,
-        seqan::Dna5String dna_sequence,
-        seqan::GeneticCode<seqan::MURPHY10> GCode,
-        seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences);
+        seqan::GeneticCode<seqan::MURPHY10> GCode);
 };
 
 } // namespace fasttext

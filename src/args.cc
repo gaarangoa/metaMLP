@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include <iostream>
+#include <map>
 
 namespace fasttext
 {
