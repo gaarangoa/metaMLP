@@ -1,8 +1,8 @@
 
 CXX = c++
-CXXFLAGS = -pthread -std=c++14
+CXXFLAGS = -pthread -std=c++14 -I include
 OBJS = src/args.o src/dictionary.o src/productquantizer.o src/matrix.o src/qmatrix.o src/vector.o src/model.o src/utils.o src/fasttext.o
-INCLUDES = -I./src
+INCLUDES = -I src
 
 opt: CXXFLAGS += -O3 -funroll-loops
 opt: metaMLP

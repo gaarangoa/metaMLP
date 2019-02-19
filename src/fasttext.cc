@@ -384,13 +384,14 @@ void FastText::test(std::istream &in, int32_t k)
     std::cerr << "Number of examples: " << nexamples << std::endl;
 }
 
-void FastText::predict(std::istream &in, int32_t k,
-                       std::vector<std::pair<real, std::string>> &predictions) const
+void FastText::predict(std::istream &in, int32_t k, std::vector<std::pair<real, std::string>> &predictions) const
 {
     std::vector<int32_t> words, labels;
+
     dict_->getLine(in, words, labels, model_->rng);
     if (words.empty())
         return;
+
     Vector hidden(args_->dim);
     Vector output(dict_->nlabels());
     std::vector<std::pair<real, int32_t>> modelPredictions;
@@ -402,112 +403,31 @@ void FastText::predict(std::istream &in, int32_t k,
     }
 }
 
-// void FastText::Report(std::string foi){
-
-//   std::ofstream fo(foi);
-
-//   int arglike=0;
-//   for(const auto& arglabel: FuncPred){
-
-//         fo << arglabel.first << "\t" << std::get<0>(arglabel.second) << "\t" << std::get<1>(arglabel.second) << "\n";
-//         arglike++;
-//   }
-
-//   fo.close();
-//   std::cout << "ARG-like reads: " << arglike << std::endl;
-
-// }
-
-void FastText::predict(std::istream &in, int32_t k, bool print_prob, std::vector<std::string> ReadLabels, int tid, std::unordered_map<std::string, std::tuple<std::string, float>> &FuncPred, std::vector<std::string> ReadSeqs, bool addSeq)
+void FastText::predict_line(std::istream &in, int32_t k, std::string header, std::ofstream &ofile)
 {
     std::vector<std::pair<real, std::string>> predictions;
 
+    predictions.clear();
     // std::ofstream foid(fout+".ARG.abn");
     int position = 0;
     std::tuple<std::string, float> ItemValue;
 
     while (in.peek() != EOF)
     {
-
         predict(in, k, predictions);
         if (predictions.empty())
         {
-            // std::cout << "__label__unclassified__" << std::endl;
-            position++;
             continue;
         }
 
-        std::stringstream _predictions;
-
-        float _best_probability = 0.0;
-        // traverse the predictions and obtain the labels with a >0.1 probability
-        // it->first: probability
-        // it->second: label
+        ofile << header << "\t";
         for (auto it = predictions.cbegin(); it != predictions.cend(); it++)
         {
-            // Here we check the best probability out of all labels (don't care much which label)
-            if (exp(it->first) > _best_probability)
-            {
-                _best_probability = exp(it->first);
-            }
-
-            // to consider a label we need to have at least a probability > 0.1
-            if (exp(it->first) >= 0.1)
-            {
-                _predictions << it->second << "prob__" << exp(it->first);
-            }
+            ofile << it->second << "__" << exp(it->first) << ";";
         }
 
-        // now check if there is another read called exaclty the same and pick up the one with the highest probability
-        // If the read id exists; then check if the probability is higher, if so, replace the content, kind of a best hit.
-        std::string read_id = ReadLabels[position];
-        if (sizeof(FuncPred[read_id]) > 0)
-        {
-            // If the read exists we need to check if the prediction is better or not.
-            // There are two scenarios where this can happen:
-            // 1) There are more than one reading frame. In that case, the read_id is the same
-            //    and we need to select the best one
-            // 2) There are paired end reads. In this case, pick up the best annotation.
-
-            if (std::get<1>(FuncPred[read_id]) < _best_probability)
-            {
-                std::get<1>(ItemValue) = _best_probability;
-                if (addSeq)
-                {
-                    std::get<0>(ItemValue) = _predictions.str() + '\t' + ReadSeqs[position];
-                }
-                else
-                {
-                    std::get<0>(ItemValue) = _predictions.str();
-                }
-
-                FuncPred[read_id] = ItemValue;
-            }
-        }
-        else
-        {
-            // here we are adding to the tupple the best probability for that read
-            std::get<1>(ItemValue) = _best_probability;
-            if (addSeq)
-            {
-                // here we need to add to the tuple the label and the sequence
-                std::get<0>(ItemValue) = _predictions.str() + '\t' + ReadSeqs[position];
-            }
-            else
-            {
-                // Here only add the predictions
-                std::get<0>(ItemValue) = _predictions.str();
-            }
-
-            // Finally we add to the hash[read_id] the best probability and the predictions
-            FuncPred[read_id] = ItemValue;
-        }
-
-        position++;
-        // std::cout <<  std::endl;
+        ofile << std::endl;
     }
-
-    // foid.close();
 }
 
 void FastText::wordVectors()
@@ -863,6 +783,242 @@ void FastText::train(std::shared_ptr<Args> args)
         {
             saveOutput();
         }
+    }
+}
+
+int get_right_position(std::string input, long position)
+{
+    std::ifstream ifs(input);
+    utils::seek(ifs, position);
+    std::string line;
+
+    while (std::getline(ifs, line))
+    {
+        if (line[0] == '>')
+        {
+            return position - 1;
+        }
+
+        position += line.length();
+    }
+
+    return position;
+}
+
+template <typename Out>
+void splitx(const std::string &s, char delim, Out result)
+{
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim))
+    {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> splitx(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    splitx(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+void FastText::process_read(
+    std::string header,
+    std::string sequence,
+    std::ofstream &ofile,
+    seqan::Dna5String dna_sequence,
+    seqan::GeneticCode<seqan::MURPHY10> GCode,
+    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences)
+{
+    // ofile << header << ":" << sequence << std::endl;
+
+    // obtain open reading frames
+    int l;
+    int ishash;
+    int rx;
+
+    std::string KMER;
+    std::string toCSkmer;
+    seqan::String<char> kimer;
+
+    dna_sequence = sequence;
+    seqan::translate(reading_frames_sequences, sequence, seqan::SIX_FRAME, GCode);
+    for (reading_frames_iterator it = begin(reading_frames_sequences); it != end(reading_frames_sequences); ++it)
+    {
+
+        // transform iterator to a string
+        seqan::move(kimer, *it);
+        toCSkmer = seqan::toCString(kimer);
+
+        // length of the orf sequence
+        l = toCSkmer.length();
+
+        rx = 0;
+        ishash = 0;
+        int tries = 0;
+        while (1)
+        {
+            KMER = toCSkmer.substr(rx, args_->kmer);
+            ishash = args_->master_signature_hash_full.count(KMER);
+            if (ishash > 0)
+                break;
+            if (tries == args_->tries)
+                break;
+            tries++;
+            rx += args_->kmer;
+        }
+
+        // If there is at least one key in the hash table
+        if (ishash > 0)
+        {
+            std::stringstream buffer(KMER);
+
+            // traverse the ORF and get the kmers for prediction
+            // Using a sliding window of 1
+            for (int ki = 1; ki < l - args_->kmer - 1; ki++)
+            {
+                buffer << ' ' + toCSkmer.substr(ki, args_->kmer);
+            }
+
+            // buffer << '\n';
+            predict_line(buffer, 5, header, ofile);
+
+            // ofile << header << '\t' << buffer.str() << std::endl;
+            // buffer.str(std::string());
+
+            // store the sequences if they need to be reported in a file
+            if (args_->fastaOutput)
+            {
+                // std::stringstream iseq;
+                // iseq.clear();
+            }
+        }
+    }
+}
+
+void FastText::mapThread(int32_t threadId)
+{
+
+    std::ifstream ifs(args_->input);
+    long file_size = utils::size(ifs);
+    long file_start_position = threadId * file_size / args_->thread;
+    long file_end_position = (threadId + 1) * file_size / args_->thread;
+
+    if (file_end_position >= file_size)
+    {
+        file_end_position = file_size;
+    }
+    else
+    {
+        file_end_position = get_right_position(args_->input, file_end_position);
+    }
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    seqan::Dna5String dna_sequence;
+    seqan::GeneticCode<seqan::MURPHY10> GCode;
+    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
+
+    utils::seek(ifs, file_start_position);
+    std::string line, name, content;
+    std::ofstream ofile;
+    ofile.open("th-" + std::to_string(threadId));
+
+    while (std::getline(ifs, line).good())
+    {
+        if (file_start_position > file_end_position)
+        { // Break if the start position is greater than the end position
+            break;
+        }
+        if (line.empty() || line[0] == '>')
+        { // Identifier marker
+            if (!name.empty())
+            { // Print out what we read from the last entry
+                if (content.size() != 0)
+                {
+                    process_read(name,
+                                 content,
+                                 ofile,
+                                 dna_sequence,
+                                 GCode,
+                                 reading_frames_sequences);
+                }
+                name.clear();
+            }
+            if (!line.empty())
+            {
+                name = line.substr(1);
+            }
+            content.clear();
+        }
+        else if (!name.empty())
+        {
+            if (line.find(' ') != std::string::npos)
+            { // Invalid sequence--no spaces allowed
+                name.clear();
+                content.clear();
+            }
+            else
+            {
+                content += line;
+            }
+        }
+
+        file_start_position += line.size();
+    }
+    if (!name.empty())
+    { // Print out what we read from the last entry
+        if (content.size() != 0)
+        {
+            process_read(name,
+                         content,
+                         ofile,
+                         dna_sequence,
+                         GCode,
+                         reading_frames_sequences);
+        }
+    }
+}
+
+void FastText::map(std::shared_ptr<Args> args)
+{
+    args_ = args;
+
+    std::cout << "Loading kmers ... \n";
+
+    std::ifstream ifs(args_->smodel + ".kh");
+    std::string line;
+    std::vector<std::string> iline;
+
+    while (std::getline(ifs, line))
+    {
+        iline = splitx(line, '\t');
+        args_->master_signature_hash_full[iline[0]] = true;
+    }
+    ifs.close();
+
+    std::cout << "Predicting ... \n";
+
+    // now it starts with the classification
+    start = clock();
+    tokenCount = 0;
+    if (args_->thread > 1)
+    {
+        std::vector<std::thread> threads;
+        for (int32_t i = 0; i < args_->thread; i++)
+        {
+            threads.push_back(std::thread([=]() { mapThread(i); }));
+        }
+        for (auto it = threads.begin(); it != threads.end(); ++it)
+        {
+            it->join();
+        }
+    }
+    else
+    {
+        mapThread(0);
     }
 }
 

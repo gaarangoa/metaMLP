@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Signatures.cpp"
+// #include "Signatures.cpp"
 #include "Index.cpp"
 #include "args.h"
 #include "utils.h"
@@ -79,26 +79,6 @@ void printPrintSentenceVectorsUsage()
         << "  <model>      model filename\n"
         << std::endl;
 }
-struct thread_data
-{
-
-    Signatures *signatures;
-    std::string fi;
-    // std::string report;
-    int tid; // thread ID
-    seqan::StringSet<seqan::CharString> ids;
-    seqan::StringSet<seqan::Dna5String> seqs;
-    std::vector<std::string> readLabels;
-    std::string buffer;
-    std::unordered_map<std::string, std::tuple<std::string, float>> FuncPred;
-};
-
-void thread_process(void *args)
-{
-    struct thread_data *params;
-    params = (struct thread_data *)args;
-    (*params->signatures).predict(params->seqs, params->ids, params->readLabels, params->buffer, params->FuncPred);
-}
 
 void compute_absolute_abundance()
 {
@@ -106,145 +86,16 @@ void compute_absolute_abundance()
 
 void quant(int argc, char **argv)
 {
-
-    if (argc < 3)
-    {
-        printPredictUsage();
-        exit(0);
-    }
-
+    // load parameters
     std::shared_ptr<fasttext::Args> a = std::make_shared<fasttext::Args>();
     a->parseArgs(argc, argv);
 
-    // std::cout << a->mink << std::endl;
+    // start fasttext
+    fasttext::FastText fastText;
 
-    std::string report_file = a->output;
-
-    int NUM_THREADS = a->thread;
-
-    std::thread threads[NUM_THREADS];
-    struct thread_data td[NUM_THREADS];
-
-    // ************************************** //
-    // how to use: ./map /path/to/fasta/file.fa /path/to/signatures.txt /path/to/fastx/model
-    // int kmer_size = stoi(kmer);
-    // Load the signatures in json format kmer-size
-    Signatures signatures(a);
-
-    // Load Fasta File
-    std::ifstream input(a->input);
-    seqan::SeqFileIn seqFileIn(seqan::toCString(a->input));
-    seqan::StringSet<seqan::CharString> ids;
-    seqan::StringSet<seqan::Dna5String> seqs;
-
-    // Open file and create Record Reader
-    typedef seqan::Iterator<seqan::StringSet<seqan::Dna5String>>::Type NIter;
-    seqan::CharString id;
-    seqan::Dna5String seq;
-
-    int ith = 0;
-    int iseq = 0;
-    int entries = 0;
-
-    // ********************************************************************************************************
-    // MAP SECTION
-    // ********************************************************************************************************
-
-    // read chunks of 10 reads at the time
-    int chunks = a->minReadChunkSize;
-    tsl::hopscotch_map<std::string, int> absolute_abundance;
-    std::vector<std::string> label_sequence;
-    int arglike = 0;
-
-    std::ofstream fo(report_file);
-    std::ofstream fabn(report_file + ".abn");
-    std::string report_fasta = report_file + ".fasta";
-    std::ofstream fasta_o(report_fasta);
-    if (!a->fastaOutput)
-        remove(report_fasta.c_str());
-
-    std::cout << "Processing Input File" << std::endl;
-
-    while (!atEnd(seqFileIn))
-    {
-        for (int thread_number = 0; thread_number < NUM_THREADS; thread_number++)
-        {
-            seqan::readRecords(ids, seqs, seqFileIn, chunks);
-            entries += length(ids);
-            // move data to thread and clear
-            seqan::move(td[thread_number].seqs, seqs);
-            seqan::move(td[thread_number].ids, ids);
-            td[thread_number].signatures = &signatures;
-            td[thread_number].tid = thread_number;
-
-            seqan::clear(seqs);
-            seqan::clear(ids);
-
-            // start a the new thread
-            threads[thread_number] = std::thread(thread_process, &td[thread_number]);
-        }
-
-        for (int thread_number = 0; thread_number < NUM_THREADS; thread_number++)
-        {
-            threads[thread_number].join();
-        }
-
-        // display # processed reads
-        std::cout << "processed reads " << entries << "\r" << std::flush;
-    }
-
-    // ********************************************************************************************************
-    // REDUCE SECTION
-    // ********************************************************************************************************
-
-    for (int i = 0; i < NUM_THREADS; i++)
-    {
-        for (const auto &arglabel : td[i].FuncPred)
-        {
-            // if a minimum probability of 0.5 report the sequence
-            if (std::get<1>(arglabel.second) >= a->minProbability)
-            {
-                // report individual classification
-                label_sequence = fasttext::utils::splitString(std::get<0>(arglabel.second), '\t');
-
-                // Report: sequence_id --> predicted_label --> probability
-                fo << arglabel.first << "\t" << label_sequence[0] << "\n";
-
-                // Report fasta file if enabled
-                if (a->fastaOutput)
-                {
-                    fasta_o << ">" << arglabel.first << "|" << label_sequence[0] << std::endl
-                            << label_sequence[1] << std::endl;
-                }
-
-                std::vector<std::string> predictions = fasttext::utils::splitStringDelims(label_sequence[0], "__label__");
-                std::vector<std::string> best_prediction = fasttext::utils::splitStringDelims(predictions[1], "__prob__");
-
-                absolute_abundance[best_prediction[0]] += 1;
-                arglike++;
-            }
-        }
-    }
-
-    std::cout << entries << " Processed sequences " << std::endl;
-    std::cout << arglike << " Annotated sequences " << std::endl;
-
-    // printout results:
-    std::cout << "Computing Relative Abundances" << std::endl;
-    std::stringstream ARGc;
-    std::string HMP;
-    for (const auto &item : absolute_abundance)
-    {
-        ARGc << item.first;
-        HMP = ARGc.str();
-        fabn << HMP << "\t" << std::to_string(item.second) << std::endl;
-        ARGc.str(std::string());
-    }
-
-    fabn.close();
-    fo.close();
-
-    exit(0);
+    std::cout << "loading model ..." << std::endl;
+    fastText.loadModel(a->smodel + ".bin");
+    fastText.map(a);
 }
 
 void index(int argc, char **argv)

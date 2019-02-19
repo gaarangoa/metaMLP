@@ -58,6 +58,7 @@ Args::Args()
     qnorm = false;
     cutoff = 0;
     dsub = 2;
+    master_signature_hash_full["NaN"] = true;
 }
 
 void Args::parseArgs(int argc, char **argv)

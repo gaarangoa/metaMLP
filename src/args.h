@@ -13,6 +13,8 @@
 #include <istream>
 #include <ostream>
 #include <string>
+#include "sparsepp/spp.h"
+#include "hop/hopscotch_map.h"
 
 namespace fasttext
 {
@@ -81,6 +83,9 @@ class Args
     bool qnorm;
     size_t cutoff;
     size_t dsub;
+
+    // hash table for prediction
+    tsl::hopscotch_map<std::string, bool> master_signature_hash_full;
 
     void parseArgs(int, char **);
     void printHelp();
