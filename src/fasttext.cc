@@ -421,45 +421,10 @@ void FastText::predict_line(std::istream &in, int32_t k, std::string header, std
             continue;
         }
 
-        // ofile << header << "\t";
+        ofile << header << "\t";
         for (auto it = predictions.cbegin(); it != predictions.cend(); it++)
         {
             ofile << it->second << "__" << exp(it->first) << ";";
-
-            // If the read id exists; then check if the probability is higher, if so, replace the content, kind of a best hit.
-            // if (sizeof(args_->predicted_reads[header]) > 0)
-            // {
-
-            //     if (std::get<1>(args_->predicted_reads[header]) < exp(it->first))
-            //     {
-            //         std::get<1>(ItemValue) = exp(it->first);
-            //         if (args_->fastaOutput)
-            //         {
-            //             std::get<0>(ItemValue) = it->second + '\t' + dna_sequence;
-            //         }
-            //         else
-            //         {
-            //             std::get<0>(ItemValue) = it->second;
-            //         }
-
-            //         args_->predicted_reads[header] = ItemValue;
-            //     }
-            // }
-            // else
-            // {
-            //     //   // If the read does not exists, just, create a new entry
-            //     std::get<1>(ItemValue) = exp(it->first);
-            //     if (args_->fastaOutput)
-            //     {
-            //         std::get<0>(ItemValue) = it->second + '\t' + dna_sequence;
-            //     }
-            //     else
-            //     {
-            //         std::get<0>(ItemValue) = it->second;
-            //     }
-
-            //     args_->predicted_reads[header] = ItemValue;
-            // }
         }
 
         ofile << std::endl;
@@ -841,25 +806,6 @@ int get_right_position(std::string input, long position)
     return position;
 }
 
-template <typename Out>
-void splitx(const std::string &s, char delim, Out result)
-{
-    std::stringstream ss;
-    ss.str(s);
-    std::string item;
-    while (std::getline(ss, item, delim))
-    {
-        *(result++) = item;
-    }
-}
-
-std::vector<std::string> splitx(const std::string &s, char delim)
-{
-    std::vector<std::string> elems;
-    splitx(s, delim, std::back_inserter(elems));
-    return elems;
-}
-
 void FastText::process_read(
     std::string header,
     std::string sequence,
@@ -873,53 +819,53 @@ void FastText::process_read(
     int ishash;
     int rx;
 
-    seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
-    seqan::Dna5String dna_sequence = sequence;
-    std::string KMER;
-    std::string toCSkmer;
-    seqan::String<char> kimer;
+    // seqan::StringSet<seqan::String<seqan::AminoAcid>, seqan::Owner<seqan::ConcatDirect<>>> reading_frames_sequences;
+    // // seqan::Dna5String dna_sequence = sequence;
+    // // std::string KMER;
+    // // std::string toCSkmer;
+    // // seqan::String<char> kimer;
 
-    seqan::translate(reading_frames_sequences, sequence, seqan::SIX_FRAME, GCode);
-    for (reading_frames_iterator it = begin(reading_frames_sequences); it != end(reading_frames_sequences); ++it)
-    {
+    // seqan::translate(reading_frames_sequences, sequence, seqan::SIX_FRAME, GCode);
+    // for (reading_frames_iterator it = begin(reading_frames_sequences); it != end(reading_frames_sequences); ++it)
+    // {
 
-        // transform iterator to a string
-        seqan::move(kimer, *it);
-        toCSkmer = seqan::toCString(kimer);
+    // // transform iterator to a string
+    // seqan::move(kimer, *it);
+    // toCSkmer = seqan::toCString(kimer);
 
-        // length of the orf sequence
-        l = toCSkmer.length();
+    // // length of the orf sequence
+    // l = toCSkmer.length();
 
-        rx = 0;
-        ishash = 0;
-        int tries = 0;
-        while (1)
-        {
-            KMER = toCSkmer.substr(rx, args_->kmer);
-            ishash = args_->master_signature_hash_full.count(KMER);
-            if (ishash > 0)
-                break;
-            if (tries == args_->tries)
-                break;
-            tries++;
-            rx += args_->kmer;
-        }
+    // rx = 0;
+    // ishash = 0;
+    // int tries = 0;
+    // while (1)
+    // {
+    //     KMER = toCSkmer.substr(rx, args_->kmer);
+    //     ishash = args_->master_signature_hash_full.count(KMER);
+    //     if (ishash > 0)
+    //         break;
+    //     if (tries == args_->tries)
+    //         break;
+    //     tries++;
+    //     rx += args_->kmer;
+    // }
 
-        // If there is at least one key in the hash table
-        if (ishash > 0)
-        {
-            std::stringstream buffer(KMER);
+    // // If there is at least one key in the hash table
+    // if (ishash > 0)
+    // {
+    //     std::stringstream buffer(KMER);
 
-            // traverse the ORF and get the kmers for prediction
-            // Using a sliding window of 1
-            for (int ki = 1; ki < l - args_->kmer - 1; ki++)
-            {
-                buffer << ' ' + toCSkmer.substr(ki, args_->kmer);
-            }
+    //     // traverse the ORF and get the kmers for prediction
+    //     // Using a sliding window of 1
+    //     for (int ki = 1; ki < l - args_->kmer - 1; ki++)
+    //     {
+    //         buffer << ' ' + toCSkmer.substr(ki, args_->kmer);
+    //     }
 
-            predict_line(buffer, 5, header, sequence, ofile);
-        }
-    }
+    //     // predict_line(buffer, 5, header, sequence, ofile);
+    // }
+    // }
 }
 
 void FastText::mapThread(int32_t threadId)
@@ -941,83 +887,68 @@ void FastText::mapThread(int32_t threadId)
 
     // std::random_device rd;
     // std::mt19937 rng(rd());
-    seqan::GeneticCode<seqan::MURPHY10> GCode;
+    // seqan::GeneticCode<seqan::MURPHY10> GCode;
 
     utils::seek(ifs, file_start_position);
     std::string line, name, content;
-    std::ofstream ofile;
-    ofile.open("part-" + std::to_string(threadId));
+    // std::ofstream ofile;
+    // ofile.open("part-" + std::to_string(threadId));
 
-    while (std::getline(ifs, line).good())
+    while (std::getline(ifs, line))
     {
-        if (file_start_position > file_end_position)
-        { // Break if the start position is greater than the end position
-            break;
-        }
-        if (line.empty() || line[0] == '>')
-        { // Identifier marker
-            if (!name.empty())
-            { // Print out what we read from the last entry
-                if (content.size() != 0)
-                {
-                    process_read(name,
-                                 content,
-                                 ofile,
-                                 GCode);
-                }
-                name.clear();
-            }
-            if (!line.empty())
-            {
-                name = line.substr(1);
-            }
-            content.clear();
-        }
-        else if (!name.empty())
-        {
-            if (line.find(' ') != std::string::npos)
-            { // Invalid sequence--no spaces allowed
-                name.clear();
-                content.clear();
-            }
-            else
-            {
-                content += line;
-            }
-        }
+        //     if (file_start_position > file_end_position)
+        //     { // Break if the start position is greater than the end position
+        //         break;
+        //     }
+        //     if (line[0] == '>')
+        //     { // Identifier marker
+        //         if (!name.empty())
+        //         { // Print out what we read from the last entry
+        //             if (content.size() != 0)
+        //             {
+        //                 process_read(name,
+        //                              content,
+        //                              ofile,
+        //                              GCode);
+        //             }
+        //             name = "";
+        //         }
+        //         if (!line.empty())
+        //         {
+        //             name = line.substr(1);
+        //         }
+        //         content = "";
+        //     }
+        //     else if (!name.empty())
+        //     {
+        //         if (line.find(' ') != std::string::npos)
+        //         { // Invalid sequence--no spaces allowed
+        //             name = "";
+        //             content = "";
+        //         }
+        //         else
+        //         {
+        //             content += line;
+        //         }
+        //     }
 
-        file_start_position += line.size();
-    }
-    if (!name.empty())
-    { // Print out what we read from the last entry
-        if (content.size() != 0)
-        {
-            process_read(name,
-                         content,
-                         ofile,
-                         GCode);
-        }
+        //     file_start_position += line.size();
+        // }
+        // if (!name.empty())
+        // { // Print out what we read from the last entry
+        //     if (content.size() != 0)
+        //     {
+        //         process_read(name,
+        //                      content,
+        //                      ofile,
+        //                      GCode);
+        //     }
     }
 }
 
 void FastText::map(std::shared_ptr<Args> args)
 {
     args_ = args;
-
-    std::cout << "Loading kmers ... \n";
-
-    std::ifstream ifs(args_->smodel + ".kh");
-    std::string line;
-    std::vector<std::string> iline;
-
-    while (std::getline(ifs, line))
-    {
-        iline = splitx(line, '\t');
-        args_->master_signature_hash_full[iline[0]] = true;
-    }
-    ifs.close();
-
-    std::cout << "Predicting ... \n";
 
     // now it starts with the classification
     start = clock();

@@ -84,6 +84,25 @@ void compute_absolute_abundance()
 {
 }
 
+template <typename Out>
+void splitx(const std::string &s, char delim, Out result)
+{
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim))
+    {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> splitx(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    splitx(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
 void quant(int argc, char **argv)
 {
     // load parameters
@@ -93,9 +112,25 @@ void quant(int argc, char **argv)
     // start fasttext
     fasttext::FastText fastText;
 
+    std::cout << "Loading kmers ... \n";
+
+    std::ifstream ifs(a->smodel + ".kh");
+    std::string line;
+    std::vector<std::string> iline;
+
+    while (std::getline(ifs, line))
+    {
+        iline = splitx(line, '\t');
+        a->master_signature_hash_full[iline[0]] = true;
+    }
+    ifs.close();
+
     std::cout << "loading model ..." << std::endl;
-    fastText.loadModel(a->smodel + ".bin");
-    fastText.map(a);
+    std::string model_file = a->smodel + ".bin";
+    fastText.loadModel(model_file);
+    std::cout << "Predicting ... \n";
+
+    // fastText.map(a);
 }
 
 void index(int argc, char **argv)
