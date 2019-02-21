@@ -37,7 +37,10 @@ void printPredictUsage()
         << "  -minReadChunkSize Load reads in memory [default 10000]\n\n"
 
         << "Optional Alphabet Parameters: \n\n"
-        << "  -NoReduced        Enable it if index is built with the -NoReduced option\n"
+        << "  -NoReduced        Enable it if index is built with the -NoReduced option\n\n"
+
+        << "Optional Output: \n\n"
+        << "  -fastaOutput    save fasta file with predicted sequences [default False]\n"
         << std::endl;
 }
 
@@ -49,8 +52,8 @@ void printIndexUsage()
         << "  -input        Protein reference database\n"
         << "  -output       Output index\n"
         << "  -kmer         k-mer size (aminoacids) [default 11]\n"
-        << "  -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)\n\n"
-
+        << "  -labp         Label index position in the FASTA header (default 4: >xx|xx|xx|label|xx)\n"
+        << "                for multiple labels use ; >xx|xx|xx|label1;label2;label3|xx|xx\n\n"
         << "Optional Training Parameters: \n\n"
 
         << "  -dim          word vector size [default 64] adjust for large number of classes\n"
@@ -66,12 +69,16 @@ void printIndexUsage()
         << "Optional Alphabet Parameters: \n\n"
         << "  -NoReduced    Dissable the reduced alphabet and use all 20 Amino Acids\n\n"
 
-        << "Optional Output: \n\n"
-        << "  -fastaOutput    save fasta file with predicted sequences [default False]\n"
-
         << std::endl;
 }
 
+void printPrintSentenceVectorsUsage()
+{
+    std::cerr
+        << "usage: fasttext print-sentence-vectors <model>\n\n"
+        << "  <model>      model filename\n"
+        << std::endl;
+}
 struct thread_data
 {
 
@@ -201,7 +208,7 @@ void quant(int argc, char **argv)
                 label_sequence = fasttext::utils::splitString(std::get<0>(arglabel.second), '\t');
 
                 // Report: sequence_id --> predicted_label --> probability
-                fo << arglabel.first << "\t" << label_sequence[0] << "\t" << std::get<1>(arglabel.second) << "\n";
+                fo << arglabel.first << "\t" << label_sequence[0] << "\n";
 
                 // Report fasta file if enabled
                 if (a->fastaOutput)
@@ -210,7 +217,10 @@ void quant(int argc, char **argv)
                             << label_sequence[1] << std::endl;
                 }
 
-                absolute_abundance[label_sequence[0]] += 1;
+                std::vector<std::string> predictions = fasttext::utils::splitStringDelims(label_sequence[0], "__label__");
+                std::vector<std::string> best_prediction = fasttext::utils::splitStringDelims(predictions[1], "__prob__");
+
+                absolute_abundance[best_prediction[0]] += 1;
                 arglike++;
             }
         }
@@ -227,7 +237,7 @@ void quant(int argc, char **argv)
     {
         ARGc << item.first;
         HMP = ARGc.str();
-        fabn << HMP.replace(HMP.length() - 2, HMP.length(), "").replace(0, 9, "") << "\t" << std::to_string(item.second) << std::endl;
+        fabn << HMP << "\t" << std::to_string(item.second) << std::endl;
         ARGc.str(std::string());
     }
 
@@ -271,6 +281,19 @@ void index(int argc, char **argv)
     exit(0);
 }
 
+void printSentenceVectors(int argc, char **argv)
+{
+    if (argc != 3)
+    {
+        printPrintSentenceVectorsUsage();
+        exit(EXIT_FAILURE);
+    }
+    fasttext::FastText fasttext;
+    fasttext.loadModel(std::string(argv[2]));
+    fasttext.printSentenceVectors();
+    exit(0);
+}
+
 //Main Function
 int main(int argc, char **argv)
 {
@@ -288,6 +311,10 @@ int main(int argc, char **argv)
     else if (command == "quant")
     {
         quant(argc, argv);
+    }
+    else if (command == "print-word-vectors")
+    {
+        printSentenceVectors(argc, argv);
     }
     else
     {

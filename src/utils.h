@@ -17,17 +17,20 @@
 #include <ios>
 #include <vector>
 
-namespace fasttext {
+namespace fasttext
+{
 
-namespace utils {
+namespace utils
+{
 
-  int64_t size(std::ifstream&);
-  void seek(std::ifstream&, int64_t);
+int64_t size(std::ifstream &);
+void seek(std::ifstream &, int64_t);
 
-  std::vector<std::string> splitString(std::string str, char delimiter);
+std::vector<std::string> splitString(std::string str, char delimiter);
+std::vector<std::string> splitStringDelims(std::string str, std::string delims);
 
-}
+} // namespace utils
 
-}
+} // namespace fasttext
 
 #endif
